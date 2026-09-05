@@ -30,8 +30,8 @@ export async function getActiveCities(req: Request, res: Response, next: NextFun
             name: c.name,
             state: c.state,
             country: c.country,
-            latitude: c.latitude,
-            longitude: c.longitude,
+            latitude: c.location.coordinates[1],
+            longitude: c.location.coordinates[0],
             timezone: c.timezone
         }));
         sendSuccess(res, safeCities, 'Active cities retrieved successfully', 200);
@@ -48,8 +48,8 @@ export async function getCityById(req: Request, res: Response, next: NextFunctio
             name: city.name,
             state: city.state,
             country: city.country,
-            latitude: city.latitude,
-            longitude: city.longitude,
+            latitude: city.location.coordinates[1],
+            longitude: city.location.coordinates[0],
             timezone: city.timezone,
             status: city.status
         };

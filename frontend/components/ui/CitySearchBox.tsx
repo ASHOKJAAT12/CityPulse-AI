@@ -99,7 +99,7 @@ export function CitySearchBox({ className }: CitySearchBoxProps) {
                         {isLoading ? (
                             <div className="text-center text-sm text-slate-500 p-4">Loading cities...</div>
                         ) : filteredCities.length === 0 ? (
-                            <div className="text-center text-sm text-slate-500 p-4">No active cities found matching '{searchQuery}'</div>
+                            <div className="text-center text-sm text-slate-500 p-4">No active cities found matching &apos;{searchQuery}&apos;</div>
                         ) : (
                             filteredCities.map(city => (
                                 <button

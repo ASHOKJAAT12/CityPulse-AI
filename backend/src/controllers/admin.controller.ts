@@ -69,7 +69,7 @@ export async function updateCityAdmin(req: Request, res: Response, next: NextFun
 }
 
 // Phase 3 Map Scaffolding - Enforces scoped fetching of city map primitives
-export async function getAdminMapData(req: Request, res: Response, next: NextFunction): Promise<void> {
+export function getAdminMapData(req: Request, res: Response, next: NextFunction): void {
     try {
         const user = req.user!;
         const mapData = {
