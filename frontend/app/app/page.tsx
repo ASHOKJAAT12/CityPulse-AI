@@ -12,13 +12,15 @@ import api from '../../services/api';
 const MapView = dynamic(() => import('../../components/map').then(m => m.MapView), { ssr: false });
 const Marker = dynamic(() => import('../../components/map').then(m => m.Marker), { ssr: false });
 
-const DEFAULT_LAYERS: MapLayer[] = [
-    { key: 'TRAFFIC', label: 'Traffic & Events', color: '#ef4444', enabled: false, available: false },
-    { key: 'EV', label: 'EV Stations', color: '#10b981', enabled: false, available: false },
-    { key: 'GARBAGE', label: 'Waste Mgmt', color: '#a855f7', enabled: false, available: false },
-    { key: 'WATER', label: 'Water Lines', color: '#3b82f6', enabled: false, available: false },
-    { key: 'ELECTRICITY', label: 'Power Grid', color: '#eab308', enabled: false, available: false },
-];
+import { getAllLayers } from '../../components/map/MapConfig';
+
+const DEFAULT_LAYERS: MapLayer[] = getAllLayers().map(l => ({
+    key: l.key,
+    label: l.label,
+    color: l.color || '#333',
+    enabled: l.enabled,
+    available: l.available
+}));
 
 export default function AppHome() {
     const { user, currentCity } = useAuthStore();
