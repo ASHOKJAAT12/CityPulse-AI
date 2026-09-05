@@ -6,6 +6,7 @@ import adminRoutes from './admin.routes';
 import cityAdminsRoutes from './city-admins.routes';
 import citizenAuthRoutes from './citizen.auth.routes';
 import citizenProfileRoutes from './citizen.profile.routes';
+import garbageRoutes from './garbage.routes';
 
 const router = Router();
 
@@ -22,6 +23,7 @@ router.use('/citizen', citizenProfileRoutes);
 router.use('/cities', citiesRoutes);
 router.use('/admin', adminRoutes);
 router.use('/city-admins', cityAdminsRoutes);
+router.use('/garbage', garbageRoutes);
 
 export default router;
 

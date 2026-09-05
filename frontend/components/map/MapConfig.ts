@@ -31,9 +31,9 @@ export const MAP_LAYERS: Record<string, MapLayerConfig> = {
     GARBAGE: {
         key: 'GARBAGE',
         label: 'Waste Mgmt',
-        color: '#a855f7',
-        enabled: false,
-        available: false,
+        color: '#10b981', // Changed to emerald tone matching garbage routes styling
+        enabled: true,
+        available: true,
         description: 'Garbage collection vehicles and routes',
         endpoint: '/api/v1/services/garbage'
     },

@@ -3,7 +3,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 import Link from 'next/link';
-import { LogOut, Map, Users, Shield } from 'lucide-react';
+import { LogOut, Map, Users, Shield, Truck } from 'lucide-react';
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
     const { user, loading, logout } = useAuth();
@@ -47,6 +47,10 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
                 <nav className="flex-1 py-4 px-3 space-y-1">
                     <Link href="/admin" className="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-800 transition-colors text-slate-300 hover:text-white">
                         <Shield className="w-5 h-5 mr-3 opacity-70" /> Dashboard
+                    </Link>
+
+                    <Link href="/admin/garbage" className="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-800 transition-colors text-slate-300 hover:text-white">
+                        <Truck className="w-5 h-5 mr-3 opacity-70" /> Garbage Ops
                     </Link>
 
                     {user.role === 'SUPER_ADMIN' && (

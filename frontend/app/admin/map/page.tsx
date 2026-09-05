@@ -8,11 +8,23 @@ import { MapLayerControl, MapLayer } from '../../../components/map/MapLayerContr
 const MapView = dynamic(() => import('../../../components/map').then(m => m.MapView), { ssr: false });
 const Marker = dynamic(() => import('../../../components/map').then(m => m.Marker), { ssr: false });
 
+import { MAP_LAYERS, getAllLayers } from '../../../components/map/MapConfig';
+const GarbageLayer = dynamic(() => import('../../../components/map/GarbageLayer').then(m => m.GarbageLayer), { ssr: false });
+
 export default function AdminMapPage() {
     const [mapData, setMapData] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [publicCityInfo, setPublicCityInfo] = useState<any>(null);
+
+    // Map Layers State
+    const [activeLayers, setActiveLayers] = useState<Record<string, boolean>>({
+        GARBAGE: false,
+    });
+
+    const handleLayerToggle = (key: string, enabled: boolean) => {
+        setActiveLayers(prev => ({ ...prev, [key]: enabled }));
+    };
 
     // We do not pollute the citizen auth store.
     // Admins load their own context explicitly.
@@ -54,6 +66,12 @@ export default function AdminMapPage() {
     // Default Fallback
     const center = publicCityInfo ? { lat: publicCityInfo.latitude, lng: publicCityInfo.longitude } : { lat: 20.5937, lng: 78.9629 }; // Default India
 
+    const layerConfigs = getAllLayers().map(l => ({
+        ...l,
+        color: l.color || '#94a3b8',
+        enabled: activeLayers[l.key] || false
+    }));
+
     return (
         <div className="space-y-6">
 
@@ -70,7 +88,14 @@ export default function AdminMapPage() {
             </div>
 
             <div className="relative rounded-2xl overflow-hidden shadow-lg border-2 border-rose-100 bg-white">
-                <MapView center={center} zoom={publicCityInfo ? 13 : 5} className="h-[650px]">
+                <div className="absolute top-4 left-4 z-[400]">
+                    <MapLayerControl
+                        layers={layerConfigs}
+                        onChange={handleLayerToggle}
+                    />
+                </div>
+
+                <MapView center={center} zoom={publicCityInfo ? 13 : 5} className="h-[700px]">
                     <div className="absolute top-4 right-4 z-[400] text-xs font-bold uppercase tracking-widest text-white/50 px-2 select-none shadow">CONFIDENTIAL: UNAUTHORIZED SHARING PROHIBITED</div>
 
                     {publicCityInfo && (
@@ -80,6 +105,8 @@ export default function AdminMapPage() {
                             icon="city"
                         />
                     )}
+
+                    {activeLayers.GARBAGE && <GarbageLayer />}
                 </MapView>
             </div>
 
