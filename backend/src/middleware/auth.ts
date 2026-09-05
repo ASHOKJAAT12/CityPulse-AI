@@ -1,12 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unused-vars */
 import { Request, Response, NextFunction } from 'express';
-import { Role, isGlobalRole } from '../constants/roles';
+import { Role, UserStatus, isGlobalRole } from '../constants/roles';
 import { AppError } from '../utils/AppError';
+import { verifyAccessToken } from '../utils/jwt';
+import { User } from '../models';
 
 // ── Extended Request type ─────────────────────────────────────────────────────
 
 /**
  * The authenticated user payload attached to req.user after JWT verification.
- * Populated by the `authenticate` middleware (Phase 1 implementation).
  */
 export interface AuthUser {
     id: string;
@@ -30,9 +32,6 @@ declare global {
 /**
  * Authentication middleware — verifies JWT and attaches `req.user`.
  *
- * PHASE 0: Returns 501 Not Implemented.
- * PHASE 1: Will verify JWT_ACCESS_SECRET, load user from DB, check isActive.
- *
  * Flow:
  *   Authorization: Bearer <token>
  *   → verify token
@@ -41,26 +40,39 @@ declare global {
  *   → attach req.user
  *   → next()
  */
-export function authenticate(req: Request, _res: Response, next: NextFunction): void {
-    // Phase 1 implementation placeholder
-    // In Phase 1, uncomment and implement JWT verification:
-    //
-    // const authHeader = req.headers.authorization;
-    // if (!authHeader?.startsWith('Bearer ')) {
-    //   return next(AppError.unauthorized('No token provided'));
-    // }
-    // const token = authHeader.split(' ')[1];
-    // try {
-    //   const payload = jwt.verify(token, env.JWT_ACCESS_SECRET) as JwtPayload;
-    //   const user = await userRepository.findById(payload.sub);
-    //   if (!user || !user.isActive) return next(AppError.unauthorized('User not found or inactive'));
-    //   req.user = { id: user.id, email: user.email, role: user.role, cityId: user.cityId, isActive: user.isActive };
-    //   next();
-    // } catch {
-    //   next(AppError.unauthorized('Invalid or expired token'));
-    // }
+export async function authenticate(req: Request, _res: Response, next: NextFunction): Promise<void> {
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith('Bearer ')) {
+        next(AppError.unauthorized('No token provided'));
+        return;
+    }
 
-    next(AppError.notImplemented('Authentication'));
+    const token = authHeader.split(' ')[1];
+    try {
+        const payload = verifyAccessToken(token);
+        const user = await User.findById(payload.userId);
+
+        if (!user) {
+            next(AppError.unauthorized('User not found'));
+            return;
+        }
+
+        if (user.status !== UserStatus.ACTIVE) {
+            next(AppError.unauthorized('User account is inactive'));
+            return;
+        }
+
+        req.user = {
+            id: user.id,
+            email: user.email,
+            role: user.role,
+            cityId: user.cityId ? user.cityId.toString() : null,
+            isActive: true
+        };
+        next();
+    } catch {
+        next(AppError.unauthorized('Invalid or expired token'));
+    }
 }
 
 /**

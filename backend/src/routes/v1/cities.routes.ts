@@ -1,33 +1,23 @@
-import { Router, Request, Response } from 'express';
-import { AppError } from '../../utils/AppError';
-import { sendSuccess } from '../../utils/response';
+/* eslint-disable @typescript-eslint/no-misused-promises */
+import { Router } from 'express';
+import { createCity, getCities, getCityById, updateCity } from '../../controllers/city.controller';
+import { validate } from '../../middleware/validate';
+import { authenticate, requireRole } from '../../middleware/auth';
+import { Role } from '../../constants/roles';
+import { createCitySchema, updateCitySchema } from '../../validators/city.validator';
 
 const router = Router();
 
-/**
- * GET /api/v1/cities
- * Phase 1+: Returns paginated list of cities.
- * Phase 0: Returns stub with architecture information.
- */
-router.get('/', (_req: Request, res: Response) => {
-    sendSuccess(
-        res,
-        {
-            cities: [],
-            note: 'Cities API — Phase 1 implementation pending',
-            architecture: 'Every city-scoped resource will be related to a City entity via cityId',
-        },
-        'Cities endpoint ready (Phase 1 implementation pending)',
-        200
-    );
-});
+// Only SUPER_ADMIN can manage cities at this phase
+router.use(authenticate);
+router.use(requireRole(Role.SUPER_ADMIN));
 
-/**
- * GET /api/v1/cities/:cityId
- * Phase 1+: Returns a specific city.
- */
-router.get('/:cityId', (_req: Request, _res: Response, next) => {
-    next(AppError.notImplemented('GET /cities/:cityId — Phase 1'));
-});
+// /api/v1/cities
+router.post('/', validate(createCitySchema), createCity);
+router.get('/', getCities);
+
+// /api/v1/cities/:id
+router.get('/:id', getCityById);
+router.patch('/:id', validate(updateCitySchema), updateCity);
 
 export default router;

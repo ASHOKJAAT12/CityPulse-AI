@@ -1,22 +1,18 @@
-import { Router, Request, Response } from 'express';
-import { AppError } from '../../utils/AppError';
+/* eslint-disable @typescript-eslint/no-misused-promises */
+import { Router } from 'express';
+import { login, refresh, logout } from '../../controllers/auth.controller';
+import { validate } from '../../middleware/validate';
+import { loginSchema, refreshSchema, logoutSchema } from '../../validators/auth.validator';
 
 const router = Router();
 
-/**
- * Auth routes — Phase 1 implementation.
- *
- * Future routes:
- *   POST /api/v1/auth/register     — Register admin (Phase 1)
- *   POST /api/v1/auth/login        — Login (Phase 1)
- *   POST /api/v1/auth/refresh      — Refresh access token (Phase 1)
- *   POST /api/v1/auth/logout       — Revoke refresh token (Phase 1)
- *   POST /api/v1/auth/forgot-password  — Phase 2
- *   POST /api/v1/auth/reset-password   — Phase 2
- */
+// /api/v1/auth/admin/login
+router.post('/admin/login', validate(loginSchema), login);
 
-router.all('*', (_req: Request, _res: Response, next) => {
-    next(AppError.notImplemented('Auth API — Phase 1'));
-});
+// /api/v1/auth/admin/refresh
+router.post('/admin/refresh', validate(refreshSchema), refresh);
+
+// /api/v1/auth/admin/logout
+router.post('/admin/logout', validate(logoutSchema), logout);
 
 export default router;
