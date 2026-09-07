@@ -55,9 +55,7 @@ export default function GarbageRouteEditor() {
             setDrivers(driRes.data || []);
 
             // Re-center map explicitly if needed.
-            if (user?.city?.latitude && user?.city?.longitude) {
-                setMapCenter({ lat: user.city.latitude, lng: user.city.longitude });
-            }
+            // cityId is available but lat/lng requires a separate city fetch; skip for now.
         } catch (e: any) {
             console.error(e);
             setError('Failed to load route data.');
@@ -135,11 +133,13 @@ export default function GarbageRouteEditor() {
             await garbageService.addStop(routeId, {
                 name: newStopForm.name,
                 sequence: newStopForm.sequence,
-                latitude: selectedMapPoint.lat,
-                longitude: selectedMapPoint.lng,
+                location: {
+                    type: 'Point',
+                    coordinates: [selectedMapPoint.lng, selectedMapPoint.lat],
+                },
                 scheduledArrival: newStopForm.scheduledArrival,
                 notes: newStopForm.notes
-            });
+            } as unknown as Partial<GarbageRouteStop>);
             showSuccess('Stop added');
             setSelectedMapPoint(null);
             setNewStopForm({});

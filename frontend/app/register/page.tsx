@@ -24,7 +24,11 @@ export default function RegisterPage() {
     useEffect(() => {
         api.get('/cities/active').then(res => {
             if (res.data.success) {
-                setCities(res.data.data);
+                const udaipurCities = res.data.data.filter((city: any) => city.name.toLowerCase().includes('udaipur'));
+                setCities(udaipurCities);
+                if (udaipurCities.length === 1) {
+                    setFormData(prev => ({ ...prev, cityId: udaipurCities[0].id || udaipurCities[0]._id }));
+                }
             }
         }).catch(err => console.error(err));
     }, []);

@@ -53,6 +53,10 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
                         <Truck className="w-5 h-5 mr-3 opacity-70" /> Garbage Ops
                     </Link>
 
+                    <Link href="/admin/garbage/live" className="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-800 transition-colors text-slate-300 hover:text-white">
+                        <span className="mr-3 text-base leading-none">📡</span> Live Tracking
+                    </Link>
+
                     {user.role === 'SUPER_ADMIN' && (
                         <>
                             <Link href="/admin/cities" className="flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-800 transition-colors text-slate-300 hover:text-white">

@@ -27,6 +27,13 @@ const envSchema = z.object({
     SEED_SUPER_ADMIN_EMAIL: z.string().email().optional(),
     SEED_SUPER_ADMIN_PASSWORD: z.string().optional(),
     SEED_CITY_NAME: z.string().default('Demo City'),
+    // Phase 5 — Live Tracking
+    GPS_UPDATE_INTERVAL_SECONDS: z.string().default('10').transform(Number),
+    GPS_STALE_AFTER_SECONDS: z.string().default('30').transform(Number),
+    ETA_DEFAULT_SPEED_KMPH: z.string().default('20').transform(Number),
+    STOP_ARRIVAL_RADIUS_METERS: z.string().default('50').transform(Number),
+    VEHICLE_LOCATION_RETENTION_DAYS: z.string().default('7').transform(Number),
+
 });
 
 export type Env = z.infer<typeof envSchema>;

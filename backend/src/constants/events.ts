@@ -19,10 +19,21 @@ export const WS_EVENTS = {
     // City
     CITY_UPDATED: 'city:updated',
 
-    // Garbage vehicles (Phase 7)
+    // Garbage vehicles — Phase 5 Live Tracking
+    GARBAGE_TRACKING_STARTED: 'garbage:tracking-started',
     GARBAGE_VEHICLE_LOCATION_UPDATED: 'garbage:vehicle-location-updated',
+    GARBAGE_ROUTE_PROGRESS_UPDATED: 'garbage:route-progress-updated',
+    GARBAGE_TRACKING_STOPPED: 'garbage:tracking-stopped',
+    GARBAGE_VEHICLE_STATUS_UPDATED: 'garbage:vehicle-status-updated',
     GARBAGE_VEHICLE_STATUS_CHANGED: 'garbage:vehicle-status-changed',
     GARBAGE_ROUTE_UPDATED: 'garbage:route-updated',
+
+    // WebSocket inbound from tracking device
+    GARBAGE_LOCATION_UPDATE: 'garbage:location-update',
+    JOIN_VEHICLE_ROOM: 'join:vehicle-room',
+    LEAVE_VEHICLE_ROOM: 'leave:vehicle-room',
+    JOIN_ROUTE_ROOM: 'join:route-room',
+    LEAVE_ROUTE_ROOM: 'leave:route-room',
 
     // Electricity (Phase 10)
     ELECTRICITY_OUTAGE_CREATED: 'electricity:outage-created',
@@ -58,4 +69,6 @@ export const roomName = {
     city: (cityId: string) => `city:${cityId}`,
     service: (cityId: string, service: string) => `city:${cityId}:${service}`,
     user: (userId: string) => `user:${userId}`,
+    vehicle: (vehicleId: string) => `vehicle:${vehicleId}`,
+    route: (routeId: string) => `route:${routeId}`,
 } as const;

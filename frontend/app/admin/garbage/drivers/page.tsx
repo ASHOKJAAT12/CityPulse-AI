@@ -4,7 +4,6 @@ import { useAuth } from '../../../../hooks/useAuth';
 import { garbageService } from '../../../../services/garbage.service';
 import { Driver } from '../../../../types/garbage.types';
 import { Plus, Edit2, ShieldAlert } from 'lucide-react';
-import { format } from 'date-fns';
 
 export default function GarbageDriversPage() {
     const { user } = useAuth();
@@ -99,13 +98,13 @@ export default function GarbageDriversPage() {
                                         <td className="px-6 py-4 text-slate-600">{driver.employeeId || 'N/A'}</td>
                                         <td className="px-6 py-4">
                                             <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium tracking-wide border ${driver.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                                                    driver.status === 'ON_LEAVE' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                                                        'bg-slate-100 text-slate-700 border-slate-200'
+                                                driver.status === 'ON_LEAVE' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                                                    'bg-slate-100 text-slate-700 border-slate-200'
                                                 }`}>
                                                 {driver.status}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-slate-500 text-sm">{format(new Date(driver.createdAt), 'MMM d, yyyy')}</td>
+                                        <td className="px-6 py-4 text-slate-500 text-sm">{new Date(driver.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
                                         <td className="px-6 py-4 text-right">
                                             <button
                                                 onClick={() => { setFormState(driver); setIsModalOpen(true); }}

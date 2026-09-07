@@ -70,3 +70,26 @@ export const createGarbageRouteStopSchema = z.object({
 export const updateGarbageRouteStopSchema = createGarbageRouteStopSchema.partial().extend({
     sequence: z.number().positive('Sequence must be a positive number').optional(),
 });
+
+
+// --- PHASE 5: TRACKING ---
+
+export const startTrackingSchema = z.object({
+    routeId: objectIdSchema,
+});
+
+export const locationUpdateSchema = z.object({
+    vehicleId: objectIdSchema.optional(), // for HTTP fallback endpoint
+    latitude: z.number().min(-90).max(90),
+    longitude: z.number().min(-180).max(180),
+    speed: z.number().min(0).optional(),
+    heading: z.number().min(0).max(360).optional(),
+    accuracy: z.number().min(0).optional(),
+});
+
+export const locationHistoryQuerySchema = z.object({
+    start: z.string().datetime({ message: 'start must be an ISO 8601 datetime' }).optional(),
+    end: z.string().datetime({ message: 'end must be an ISO 8601 datetime' }).optional(),
+    page: z.string().regex(/^\d+$/).transform(Number).optional(),
+    limit: z.string().regex(/^\d+$/).transform(Number).optional(),
+});

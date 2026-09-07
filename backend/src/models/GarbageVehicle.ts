@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import { VehicleStatus, VehicleType } from '../constants/garbage';
+import { VehicleStatus, VehicleType, TrackingStatus } from '../constants/garbage';
 
 export interface IGarbageVehicle extends Document {
     cityId: mongoose.Types.ObjectId;
@@ -11,6 +11,15 @@ export interface IGarbageVehicle extends Document {
     status: VehicleStatus;
     active: boolean;
     notes?: string;
+    // Phase 5 — Live Tracking
+    currentLocation?: {
+        type: 'Point';
+        coordinates: [number, number]; // [longitude, latitude]
+    };
+    lastLocationAt?: Date;
+    trackingStatus: TrackingStatus;
+    currentRouteId?: mongoose.Types.ObjectId;
+    currentStopId?: mongoose.Types.ObjectId;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -34,6 +43,19 @@ const garbageVehicleSchema = new Schema<IGarbageVehicle>(
         },
         active: { type: Boolean, default: true },
         notes: { type: String },
+        // Phase 5 — Live Tracking
+        currentLocation: {
+            type: { type: String, enum: ['Point'] },
+            coordinates: { type: [Number] },
+        },
+        lastLocationAt: { type: Date },
+        trackingStatus: {
+            type: String,
+            enum: Object.values(TrackingStatus),
+            default: TrackingStatus.NOT_TRACKING,
+        },
+        currentRouteId: { type: Schema.Types.ObjectId, ref: 'GarbageRoute' },
+        currentStopId: { type: Schema.Types.ObjectId, ref: 'GarbageRouteStop' },
     },
     { timestamps: true }
 );
@@ -43,6 +65,10 @@ garbageVehicleSchema.index({ cityId: 1 });
 garbageVehicleSchema.index({ cityId: 1, vehicleNumber: 1 }, { unique: true });
 garbageVehicleSchema.index({ status: 1 });
 garbageVehicleSchema.index({ driverId: 1 });
+garbageVehicleSchema.index({ trackingStatus: 1 });
+garbageVehicleSchema.index({ cityId: 1, trackingStatus: 1 });
+garbageVehicleSchema.index({ currentRouteId: 1 });
+garbageVehicleSchema.index({ currentLocation: '2dsphere' }, { sparse: true });
 
 export const GarbageVehicle = mongoose.model<IGarbageVehicle>(
     'GarbageVehicle',

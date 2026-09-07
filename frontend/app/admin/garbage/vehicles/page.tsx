@@ -192,7 +192,7 @@ export default function GarbageVehiclesPage() {
                                         value={formState.driverId as string || ''}
                                         onChange={(e) => {
                                             const driverId = e.target.value;
-                                            setFormState({ ...formState, driverId: driverId === '' ? null : driverId });
+                                            setFormState({ ...formState, driverId: driverId === '' ? undefined : driverId });
                                         }}
                                     >
                                         <option value="">-- Unassigned --</option>

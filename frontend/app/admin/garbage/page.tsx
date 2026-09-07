@@ -30,10 +30,10 @@ export default function GarbageDashboard() {
                 if (mounted) {
                     setStats({
                         totalVehicles: vehiclesRes.data?.length || 0,
-                        activeRoutes: routesRes.data?.filter(r => r.status === 'ACTIVE').length || 0,
+                        activeRoutes: routesRes.data?.filter((r: { status: string }) => r.status === 'ACTIVE').length || 0,
                         totalDrivers: driversRes.data?.length || 0,
-                        draftRoutes: routesRes.data?.filter(r => r.status === 'DRAFT').length || 0,
-                        maintenanceVehicles: vehiclesRes.data?.filter(v => v.status === 'MAINTENANCE').length || 0,
+                        draftRoutes: routesRes.data?.filter((r: { status: string }) => r.status === 'DRAFT').length || 0,
+                        maintenanceVehicles: vehiclesRes.data?.filter((v: { status: string }) => v.status === 'MAINTENANCE').length || 0,
                     });
                 }
             } catch (error) {

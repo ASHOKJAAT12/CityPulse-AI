@@ -28,3 +28,24 @@ export enum RouteStatus {
     ACTIVE = 'ACTIVE',
     INACTIVE = 'INACTIVE',
 }
+
+/**
+ * Phase 5 — Live Tracking
+ */
+export enum TrackingStatus {
+    ONLINE = 'ONLINE',        // Recent GPS update received within threshold
+    STALE = 'STALE',          // No update recently, but was online
+    OFFLINE = 'OFFLINE',      // Session ended or device disconnected
+    NOT_TRACKING = 'NOT_TRACKING', // No active tracking session
+}
+
+export enum TrackingSessionStatus {
+    ACTIVE = 'ACTIVE',
+    ENDED = 'ENDED',
+}
+
+export enum StopVisitStatus {
+    BEFORE_STOP = 'BEFORE_STOP',
+    AT_STOP = 'AT_STOP',
+    PASSED_STOP = 'PASSED_STOP',
+}

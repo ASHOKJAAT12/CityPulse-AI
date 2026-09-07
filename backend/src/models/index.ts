@@ -1,4 +1,11 @@
-export * from './City';
-export * from './User';
-export * from './RefreshToken';
-export * from './AuditLog';
+export { City } from './City';
+export { User } from './User';
+export { RefreshToken } from './RefreshToken';
+export { AuditLog } from './AuditLog';
+export { Driver } from './Driver';
+export { GarbageVehicle } from './GarbageVehicle';
+export { GarbageRoute } from './GarbageRoute';
+export { GarbageRouteStop } from './GarbageRouteStop';
+// Phase 5 — Live Tracking
+export { TrackingSession } from './TrackingSession';
+export { VehicleLocation } from './VehicleLocation';
