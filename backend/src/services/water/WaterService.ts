@@ -3,6 +3,7 @@ import { intelligenceBus } from '../intelligence/IntelligenceEventEmitter';
 import { WaterAsset, WaterSensor, WaterSensorReading, WaterIncident, WaterSupplySchedule } from '../../models';
 import { emitToCityRoom } from '../../websocket';
 import { notificationService, NotificationAudience } from '../notification/NotificationService';
+import { dtBus } from '../digitalTwin/SyncService';
 
 export class WaterService {
     // ─── ASSETS ─────────────────────────────────────────────────────────────
@@ -26,6 +27,11 @@ export class WaterService {
             createdBy: userId
         });
         await asset.save();
+        dtBus.emit('sync-node', {
+            cityId, domain: 'WATER', entityType: 'WATER_ASSET',
+            entityId: asset._id.toString(), name: asset.name,
+            location: asset.location, status: asset.status, health: 100
+        });
         return asset;
     }
 
@@ -36,6 +42,11 @@ export class WaterService {
             { new: true, runValidators: true }
         );
         if (!asset) throw AppError.notFound('Water Asset not found');
+        dtBus.emit('sync-node', {
+            cityId, domain: 'WATER', entityType: 'WATER_ASSET',
+            entityId: asset._id.toString(), name: asset.name,
+            location: asset.location, status: asset.status, health: 100
+        });
         return asset;
     }
 
@@ -45,6 +56,7 @@ export class WaterService {
         if (sensors > 0) throw AppError.badRequest('Cannot delete asset with attached sensors');
 
         await WaterAsset.findOneAndDelete({ _id: id, cityId });
+        dtBus.emit('remove-node', { cityId, entityId: id });
     }
 
     // ─── SENSORS ────────────────────────────────────────────────────────────

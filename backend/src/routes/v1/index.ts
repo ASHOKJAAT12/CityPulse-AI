@@ -59,10 +59,13 @@ import notificationRoutes from './notification.routes';
 import adminNotificationRoutes from './adminNotification.routes';
 import analyticsRoutes from './analytics.routes';
 import intelligenceRoutes from './intelligence.routes';
+import digitalTwinRoutes from './digitalTwin.routes';
+
 router.use('/notifications', notificationRoutes);
 router.use('/admin/notifications', adminNotificationRoutes);
 router.use('/analytics', analyticsRoutes);
 router.use('/intelligence', intelligenceRoutes);
+router.use('/digital-twin', digitalTwinRoutes);
 
 // Phase 14 - Emergency Response
 import emergencyRoutes from './emergency.routes';

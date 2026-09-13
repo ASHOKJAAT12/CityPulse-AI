@@ -82,3 +82,8 @@ export * from './EmergencyResource';
 export * from './EmergencyAssignment';
 export * from './EmergencyTimeline';
 export * from './EmergencyCorrelation';
+
+// Phase 17 - Digital Twin
+export * from './DigitalTwinNode';
+export * from './DigitalTwinRelationship';
+export * from './DigitalTwinSnapshot';

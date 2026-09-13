@@ -8,6 +8,7 @@ import { connectDatabase, disconnectDatabase } from './config/database';
 import { initializeWebSocket } from './websocket';
 import logger from './utils/logger';
 import { TelemetryIntelligencePipeline } from './services/intelligence/pipeline/TelemetryIntelligencePipeline';
+import { DigitalTwinSyncService } from './services/digitalTwin/SyncService';
 
 const PORT = env.PORT;
 
@@ -26,6 +27,9 @@ async function startServer(): Promise<void> {
 
     // ── 4.5 Initialize AI Intelligence Pipeline ──────────────────
     TelemetryIntelligencePipeline.init();
+
+    // ── 4.6 Initialize Digital Twin Symbiosis ────────────────────
+    DigitalTwinSyncService.init();
 
     // ── 5. Start listening ──────────────────────────────────────
     server.listen(PORT, () => {
