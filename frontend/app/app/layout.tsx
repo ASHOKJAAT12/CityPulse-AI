@@ -4,6 +4,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '../../store/useAuthStore';
 import { CitySearchBox } from '../../components/ui/CitySearchBox';
+import { NotificationBell } from '../../components/ui/NotificationBell';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
     const { user, isAuthenticated, isLoading, currentCity, checkSession, logout } = useAuthStore();
@@ -40,6 +41,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         <Link href="/app" className={`hover:text-indigo-600 transition-colors ${pathname === '/app' ? 'text-indigo-700' : ''}`}>Dashboard</Link>
                         <Link href="/app/profile" className={`hover:text-indigo-600 transition-colors ${pathname === '/app/profile' ? 'text-indigo-700' : ''}`}>Profile</Link>
                         <Link href="/app/settings" className={`hover:text-indigo-600 transition-colors ${pathname === '/app/settings' ? 'text-indigo-700' : ''}`}>Settings</Link>
+                        <NotificationBell token={useAuthStore.getState().accessToken || undefined} />
                         <button onClick={() => logout()} className="hover:text-rose-600 transition-colors">Logout</button>
                     </nav>
                 </div>

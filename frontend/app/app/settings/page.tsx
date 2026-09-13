@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import api from '../../../services/api';
 import { useAuthStore } from '../../../store/useAuthStore';
+import Link from 'next/link';
 
 export default function SettingsPage() {
     const { user, currentCity, setCity } = useAuthStore();
@@ -127,6 +128,16 @@ export default function SettingsPage() {
                         {pwdLoading ? 'Updating...' : 'Update Password'}
                     </button>
                 </form>
+            </div>
+
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex justify-between items-center mt-8">
+                <div>
+                    <h2 className="text-xl font-bold text-gray-900 mb-1">Notification Preferences</h2>
+                    <p className="text-sm text-gray-500">Manage how you receive alerts and updates across city services.</p>
+                </div>
+                <Link href="/app/settings/notifications" className="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+                    Configure
+                </Link>
             </div>
 
         </div>

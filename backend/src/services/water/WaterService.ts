@@ -1,7 +1,9 @@
 import { Types } from 'mongoose';
 import { AppError } from '../../utils/AppError';
+import { intelligenceBus } from '../intelligence/IntelligenceEventEmitter';
 import { WaterAsset, WaterSensor, WaterSensorReading, WaterIncident, WaterSupplySchedule } from '../../models';
 import { emitToCityRoom } from '../../websocket';
+import { notificationService, NotificationAudience } from '../notification/NotificationService';
 import { WS_EVENTS } from '../../constants/events';
 import logger from '../../utils/logger';
 
@@ -103,6 +105,12 @@ export class WaterService {
 
         await reading.save();
 
+        intelligenceBus.emit('telemetry:ingested', {
+            cityId, service: 'WATER', metric: sensor.sensorType,
+            sourceType: 'SENSOR', sourceId: sensorId,
+            value, recordedAt, unit: sensor.unit
+        });
+
         // Check thresholds
         let newStatus = sensor.status;
         let isIncident = false;
@@ -173,6 +181,17 @@ export class WaterService {
                 await incident.save();
 
                 emitToCityRoom(cityId, 'water:incident-created', incident);
+
+                await notificationService.send({
+                    cityId: cityId,
+                    audience: NotificationAudience.CITY,
+                    category: 'WATER',
+                    priority: 'CRITICAL',
+                    title: incident.title,
+                    message: incident.description,
+                    referenceType: 'WATER_INCIDENT',
+                    referenceId: incident._id.toString()
+                });
 
                 // update asset status
                 await WaterAsset.updateOne(
@@ -278,6 +297,17 @@ export class WaterService {
         await schedule.save();
 
         emitToCityRoom(cityId, 'water:supply-schedule-updated', schedule);
+
+        await notificationService.send({
+            cityId: cityId,
+            audience: NotificationAudience.CITY,
+            category: 'WATER',
+            priority: 'INFO',
+            title: `Water Supply Schedule Updated`,
+            message: `A new or updated water supply schedule has been published for your area.`,
+            referenceType: 'WATER_SCHEDULE',
+            referenceId: schedule._id.toString()
+        });
         return schedule;
     }
 

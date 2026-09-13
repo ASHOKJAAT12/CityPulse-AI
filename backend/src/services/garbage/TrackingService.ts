@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import mongoose from 'mongoose';
+import { intelligenceBus } from '../intelligence/IntelligenceEventEmitter';
 import { GarbageVehicle } from '../../models/GarbageVehicle';
 import { GarbageRoute } from '../../models/GarbageRoute';
 import { TrackingSession } from '../../models/TrackingSession';
@@ -12,6 +13,7 @@ import logger from '../../utils/logger';
 import { RouteProgressService } from './RouteProgressService';
 import { EtaService } from './EtaService';
 import { LocationHistoryService } from './LocationHistoryService';
+import { notificationService, NotificationAudience } from '../notification/NotificationService';
 
 export interface GpsPayload {
     latitude: number;
@@ -281,6 +283,17 @@ export class TrackingService {
             vehicleId,
             lastUpdatedAt: now.toISOString(),
         });
+
+        // AI Intelligence Engine
+        intelligenceBus.emit('garbage:location-recorded', {
+            vehicleId,
+            routeId: session.routeId.toString(),
+            cityId: vehicle.cityId.toString(),
+            speed: payload.speed,
+            progressPercent: progress.progressPercent,
+            expectedRemainingMinutes: progress.eta.etaMinutes,
+            remainingStops: progress.remainingStops
+        });
     }
 
     // ── Get Tracking Status ────────────────────────────────────────
@@ -353,6 +366,18 @@ export class TrackingService {
             });
 
         logger.warn('Vehicle marked STALE', { vehicleId });
+
+        await notificationService.send({
+            cityId: cityId,
+            audience: NotificationAudience.ROLE,
+            role: 'CITY_ADMIN',
+            category: 'GARBAGE',
+            priority: 'MEDIUM',
+            title: `Garbage Vehicle Tracking Lost`,
+            message: `Vehicle (ID: ${vehicleId}) has gone offline unexpectedly and tracking is now marked as STALE.`,
+            referenceType: 'GARBAGE_VEHICLE',
+            referenceId: vehicleId
+        });
     }
 
     // ── GPS Validation ─────────────────────────────────────────────

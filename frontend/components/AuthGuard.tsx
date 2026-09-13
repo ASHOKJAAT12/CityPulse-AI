@@ -4,6 +4,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { LogOut, Map, Users, Shield, Truck, ClipboardList } from 'lucide-react';
+import { NotificationBell } from './ui/NotificationBell';
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
     const { user, loading, logout } = useAuth();
@@ -116,6 +117,9 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
                 <header className="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-8 shadow-sm z-10">
                     <h2 className="text-slate-800 font-semibold">{user.role === 'CITY_ADMIN' && user.cityId ? 'City Admin Zone' : 'Global Platform Control'}</h2>
+                    <div className="flex items-center space-x-4">
+                        <NotificationBell isAdmin={true} />
+                    </div>
                 </header>
                 <main className="flex-1 overflow-y-auto p-8">
                     <div className="max-w-6xl mx-auto">

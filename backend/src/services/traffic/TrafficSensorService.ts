@@ -2,6 +2,7 @@ import { TrafficSensor, TrafficSensorReading, TrafficCongestionEvent, TrafficRoa
 import { AppError as ApiError } from '../../utils/AppError';
 import { getIO } from '../../websocket';
 import { WS_EVENTS } from '../../constants/events';
+import { intelligenceBus } from '../intelligence/IntelligenceEventEmitter';
 
 export class TrafficSensorService {
     // CRUD Sensors
@@ -55,6 +56,17 @@ export class TrafficSensorService {
         });
 
         await reading.save();
+
+        intelligenceBus.emit('telemetry:ingested', {
+            cityId,
+            service: 'TRAFFIC',
+            metric: sensor.sensorType || 'SPEED',
+            sourceType: 'SENSOR',
+            sourceId: sensorId,
+            value: data.value,
+            recordedAt,
+            unit: sensor.unit
+        });
 
         // Update sensor latest reading
         sensor.currentValue = data.value;

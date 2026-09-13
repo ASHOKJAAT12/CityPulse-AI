@@ -1,6 +1,8 @@
 import { AppError } from '../../utils/AppError';
 import { ElectricitySensor, ElectricitySensorReading, ElectricityIncident, ElectricityAsset } from '../../models';
 import { emitToCityRoom } from '../../websocket';
+import { notificationService, NotificationAudience } from '../notification/NotificationService';
+import { intelligenceBus } from '../intelligence/IntelligenceEventEmitter';
 
 export class ElectricityTelemetryService {
     // ─── THRESHOLD ENGINE & SENSOR READINGS ─────────────────────────────────
@@ -22,6 +24,12 @@ export class ElectricityTelemetryService {
             source: data.source || 'API'
         });
         await reading.save();
+
+        intelligenceBus.emit('telemetry:ingested', {
+            cityId, service: 'ELECTRICITY', metric: sensor.sensorType,
+            sourceType: 'SENSOR', sourceId: sensorId,
+            value, recordedAt, unit: sensor.unit
+        });
 
         let newStatus = sensor.status;
         let isIncident = false;
@@ -92,6 +100,17 @@ export class ElectricityTelemetryService {
                 });
                 await incident.save();
                 emitToCityRoom(cityId, 'electricity:incident-created', incident);
+
+                await notificationService.send({
+                    cityId: cityId,
+                    audience: NotificationAudience.CITY,
+                    category: 'ELECTRICITY',
+                    priority: 'CRITICAL',
+                    title: incident.title,
+                    message: incident.description,
+                    referenceType: 'ELECTRICITY_INCIDENT',
+                    referenceId: incident._id.toString()
+                });
 
                 const asset = await ElectricityAsset.findOneAndUpdate(
                     { _id: sensor.assetId },

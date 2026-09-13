@@ -1,6 +1,7 @@
 import { AppError } from '../../utils/AppError';
 import { PowerOutage, ElectricityMaintenance, ElectricityAsset } from '../../models';
 import { emitToCityRoom } from '../../websocket';
+import { notificationService, NotificationAudience } from '../notification/NotificationService';
 
 export class OutageService {
     // ─── OUTAGES ────────────────────────────────────────────────────────────
@@ -31,6 +32,18 @@ export class OutageService {
         await outage.save();
 
         emitToCityRoom(cityId, 'electricity:outage-created', outage);
+
+        // Notify city about outage
+        await notificationService.send({
+            cityId: cityId,
+            audience: NotificationAudience.CITY,
+            category: 'ELECTRICITY',
+            priority: 'HIGH',
+            title: `Power Outage Reported`,
+            message: `A power outage has been reported in your area: ${outage.cause || 'Under investigation'}`,
+            referenceType: 'POWER_OUTAGE',
+            referenceId: outage._id.toString()
+        });
         return outage;
     }
 
@@ -47,6 +60,19 @@ export class OutageService {
 
         await outage.save();
         emitToCityRoom(cityId, 'electricity:outage-updated', outage);
+
+        if (['RESTORED', 'CANCELLED'].includes(outage.status as string) && !['RESTORED', 'CANCELLED'].includes(previousStatus)) {
+            await notificationService.send({
+                cityId: cityId,
+                audience: NotificationAudience.CITY,
+                category: 'ELECTRICITY',
+                priority: 'INFO',
+                title: `Power Outage ${outage.status}`,
+                message: `The previously reported power outage has been ${outage.status.toLowerCase()}.`,
+                referenceType: 'POWER_OUTAGE',
+                referenceId: outage._id.toString()
+            });
+        }
         return outage;
     }
 

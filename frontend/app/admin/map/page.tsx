@@ -12,6 +12,7 @@ import { MAP_LAYERS, getAllLayers } from '../../../components/map/MapConfig';
 const GarbageLayer = dynamic(() => import('../../../components/map/GarbageLayer').then(m => m.GarbageLayer), { ssr: false });
 const WaterLayer = dynamic(() => import('../../../components/map/WaterLayer').then(m => m.WaterLayer), { ssr: false });
 const ElectricityLayer = dynamic(() => import('../../../components/map/ElectricityLayer').then(m => m.ElectricityLayer), { ssr: false });
+const IntelligenceLayer = dynamic(() => import('../../../components/map/IntelligenceLayer').then(m => m.IntelligenceLayer), { ssr: false });
 export default function AdminMapPage() {
     const [mapData, setMapData] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -110,6 +111,7 @@ export default function AdminMapPage() {
                     {activeLayers.GARBAGE && <GarbageLayer />}
                     {activeLayers.WATER && <WaterLayer cityId={mapData?.cityId} visible={activeLayers.WATER} />}
                     {activeLayers.ELECTRICITY && <ElectricityLayer cityId={mapData?.cityId} visible={activeLayers.ELECTRICITY} />}
+                    {activeLayers.INTELLIGENCE && <IntelligenceLayer cityId={mapData?.cityId} visible={activeLayers.INTELLIGENCE} centerLat={center.lat} centerLng={center.lng} />}
                 </MapView>
             </div>
 

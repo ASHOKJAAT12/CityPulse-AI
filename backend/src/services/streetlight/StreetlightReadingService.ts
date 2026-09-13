@@ -3,6 +3,8 @@ import { AppError } from '../../utils/AppError';
 import { getIO } from '../../websocket';
 import { WS_EVENTS } from '../../constants/events';
 import mongoose from 'mongoose';
+import { notificationService, NotificationAudience } from '../notification/NotificationService';
+import { intelligenceBus } from '../intelligence/IntelligenceEventEmitter';
 
 export class StreetlightReadingService {
     static async getSensors(cityId: string) {
@@ -32,6 +34,12 @@ export class StreetlightReadingService {
         });
 
         await reading.save();
+
+        intelligenceBus.emit('telemetry:ingested', {
+            cityId, service: 'STREETLIGHT', metric: sensor.sensorType,
+            sourceType: 'SENSOR', sourceId: sensorId,
+            value: data.value, recordedAt, unit: sensor.unit
+        });
 
         sensor.currentValue = data.value;
         sensor.lastReadingAt = recordedAt;
@@ -100,6 +108,19 @@ export class StreetlightReadingService {
 
                 const io = getIO();
                 if (io) io.to(`city:${sensor.cityId}`).emit(WS_EVENTS.STREETLIGHT_INCIDENT_CREATED, incident);
+
+                if (severity === 'HIGH') {
+                    await notificationService.send({
+                        cityId: sensor.cityId.toString(),
+                        audience: NotificationAudience.CITY,
+                        category: 'STREETLIGHT',
+                        priority: severity,
+                        title: incident.title,
+                        message: incident.description,
+                        referenceType: 'STREETLIGHT_INCIDENT',
+                        referenceId: incident._id.toString()
+                    });
+                }
             }
         }
     }

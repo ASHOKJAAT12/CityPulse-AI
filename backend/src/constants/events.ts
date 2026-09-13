@@ -69,9 +69,12 @@ export const WS_EVENTS = {
     EV_INCIDENT_UPDATED: 'ev:incident-updated',
     EV_MAINTENANCE_UPDATED: 'ev:maintenance-updated',
 
-    // Notifications (Phase 15)
-    NOTIFICATION_NEW: 'notification:new',
+    // Notifications (Phase 12)
+    NOTIFICATION_NEW: 'notification:created',
     NOTIFICATION_READ: 'notification:read',
+    NOTIFICATION_ARCHIVED: 'notification:archived',
+    NOTIFICATION_COUNT_UPDATED: 'notification:count-updated',
+    NOTIFICATION_ANNOUNCEMENT_PUBLISHED: 'notification:announcement-published',
 
     // Citizen Reports (Phase 11)
     CITIZEN_REPORT_CREATED: 'citizen-report-created',

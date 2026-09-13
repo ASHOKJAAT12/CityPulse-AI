@@ -108,7 +108,7 @@ export default function ReportDetailPage() {
                                     <AlertCircle className="w-4 h-4" /> Evidence Attached
                                 </h3>
                                 <div className="flex gap-4 overflow-x-auto pb-2">
-                                    {report.attachments.map((file, i) => (
+                                    {report.attachments.map((file: any, i: number) => (
                                         <a
                                             key={i}
                                             href={api.defaults.baseURL?.replace('/api/v1', '') + file.url || file.url}
@@ -146,7 +146,7 @@ export default function ReportDetailPage() {
                             {comments.length === 0 ? (
                                 <div className="text-sm text-center text-muted-foreground py-8">No comments yet. Administrative updates will appear here.</div>
                             ) : (
-                                comments.map(c => (
+                                comments.map((c: any) => (
                                     <div key={c._id} className={`flex flex-col max-w-[85%] rounded-lg p-3 ${c.authorRole === 'CITIZEN' ? 'bg-primary text-primary-foreground self-end rounded-tr-none' : 'bg-background border shadow-sm self-start rounded-tl-none'}`}>
                                         <div className="text-xs opacity-70 mb-1 flex items-center gap-1.5">
                                             {c.authorRole !== 'CITIZEN' && <Settings className="w-3.5 h-3.5" />}
@@ -190,7 +190,7 @@ export default function ReportDetailPage() {
                         </h3>
 
                         <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-muted-foreground/20 before:to-transparent">
-                            {timeline.map((event, idx) => (
+                            {timeline.map((event: any, idx: number) => (
                                 <div key={idx} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
                                     <div className="flex items-center justify-center w-6 h-6 rounded-full border-2 border-background bg-primary text-primary-foreground shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow absolute left-2 md:left-1/2 z-10">
                                         <div className="w-2 h-2 rounded-full bg-white"></div>

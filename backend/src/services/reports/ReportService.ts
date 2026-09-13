@@ -1,8 +1,10 @@
 import { Types } from 'mongoose';
+import { intelligenceBus } from '../intelligence/IntelligenceEventEmitter';
 import { CitizenReport, CitizenReportTimeline, CitizenReportComment, IAttachment } from '../../models';
 import { DepartmentService } from './DepartmentService';
 import { emitToCityRoom } from '../../websocket';
 import { AppError } from '../../utils/AppError';
+import { notificationService, NotificationAudience } from '../notification/NotificationService';
 
 export class ReportService {
     static generateReportNumber() {
@@ -85,6 +87,8 @@ export class ReportService {
             category: report.category,
             isDuplicate
         });
+
+        intelligenceBus.emit('report:created', report);
 
         return report;
     }
@@ -177,6 +181,19 @@ export class ReportService {
                 reportNumber: report.reportNumber,
                 status: newStatus
             });
+
+            // Dispatch notification to user
+            await notificationService.send({
+                cityId: report.cityId.toString(),
+                audience: NotificationAudience.USER,
+                userId: report.citizenId.toString(),
+                category: 'CITIZEN_REPORT',
+                priority: 'INFO',
+                title: `Report Status: ${newStatus}`,
+                message: `Your report ${report.reportNumber} has transitioned to ${newStatus}.`,
+                referenceType: 'CITIZEN_REPORT',
+                referenceId: report._id.toString()
+            });
         }
 
         return report;
@@ -199,6 +216,24 @@ export class ReportService {
             reportId,
             actorRole: authorRole
         });
+
+        // Notify user about admin comment
+        if (authorRole !== 'CITIZEN' && visibleToCitizen) {
+            const reportDoc = await CitizenReport.findById(reportId).lean();
+            if (reportDoc) {
+                await notificationService.send({
+                    cityId: cityId,
+                    audience: NotificationAudience.USER,
+                    userId: reportDoc.citizenId.toString(),
+                    category: 'CITIZEN_REPORT',
+                    priority: 'INFO',
+                    title: `New Comment on Report`,
+                    message: `An official has commented on your report: ${message.substring(0, 50)}...`,
+                    referenceType: 'CITIZEN_REPORT',
+                    referenceId: reportId
+                });
+            }
+        }
 
         return comment;
     }

@@ -60,3 +60,16 @@ export { CityDepartment, ICityDepartment } from './CityDepartment';
 export { CitizenReport, ICitizenReport, IAttachment } from './CitizenReport';
 export { CitizenReportTimeline, ICitizenReportTimeline } from './CitizenReportTimeline';
 export { CitizenReportComment, ICitizenReportComment } from './CitizenReportComment';
+
+// Phase 12 - Notifications
+export { Notification, INotification } from './Notification';
+export { NotificationPreference, INotificationPreference } from './NotificationPreference';
+
+// Phase 13 AI Models
+export * from './IntelligenceEvent';
+export * from './AnomalyDetection';
+export * from './RiskAssessment';
+export * from './Prediction';
+export * from './Recommendation';
+export * from './IntelligenceFeedback';
+export * from './IntelligenceModelConfig';

@@ -3,6 +3,8 @@ import { AppError } from '../../utils/AppError';
 import { WS_EVENTS } from '../../constants/events';
 import { getIO } from '../../websocket';
 import mongoose from 'mongoose';
+import { notificationService, NotificationAudience } from '../notification/NotificationService';
+import { intelligenceBus } from '../intelligence/IntelligenceEventEmitter';
 
 export class EVStationService {
     static async getStations(cityId: string) {
@@ -123,6 +125,21 @@ export class EVStationService {
         const reading = new EVStationReading(objIdPayload);
         await reading.save();
 
+        if (data.temperature !== undefined) {
+            intelligenceBus.emit('telemetry:ingested', {
+                cityId, service: 'EV', metric: 'TEMPERATURE',
+                sourceType: 'STATION', sourceId: stationId,
+                value: data.temperature, recordedAt: new Date(), unit: 'C'
+            });
+        }
+        if (data.powerKw !== undefined) {
+            intelligenceBus.emit('telemetry:ingested', {
+                cityId, service: 'EV', metric: 'POWER',
+                sourceType: 'STATION', sourceId: stationId,
+                value: data.powerKw, recordedAt: new Date(), unit: 'kW'
+            });
+        }
+
         const io = getIO();
         if (io) {
             io.to(`city:${cityId}`).emit(WS_EVENTS.EV_READING_UPDATED, reading);
@@ -131,7 +148,17 @@ export class EVStationService {
         // Extremely simple threshold logic for "overheating"
         if (data.temperature && data.temperature > 85) {
             console.log(`EV Warning: Station ${stationId} is overheating (${data.temperature}C)`);
-            // We can generate an incident here async.
+
+            await notificationService.send({
+                cityId: cityId,
+                audience: NotificationAudience.CITY,
+                category: 'EV',
+                priority: 'CRITICAL',
+                title: `EV Station Overheating Warning`,
+                message: `Critical temperature (${data.temperature}°C) detected at station. Automatic cooling or shutdown protocols advised.`,
+                referenceType: 'EV_STATION',
+                referenceId: stationId
+            });
         }
 
         return reading;

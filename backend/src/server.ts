@@ -7,6 +7,7 @@ import { env } from './config/env';
 import { connectDatabase, disconnectDatabase } from './config/database';
 import { initializeWebSocket } from './websocket';
 import logger from './utils/logger';
+import { TelemetryIntelligencePipeline } from './services/intelligence/pipeline/TelemetryIntelligencePipeline';
 
 const PORT = env.PORT;
 
@@ -22,6 +23,9 @@ async function startServer(): Promise<void> {
 
     // ── 4. Initialize WebSocket ─────────────────────────────────
     initializeWebSocket(server);
+
+    // ── 4.5 Initialize AI Intelligence Pipeline ──────────────────
+    TelemetryIntelligencePipeline.init();
 
     // ── 5. Start listening ──────────────────────────────────────
     server.listen(PORT, () => {

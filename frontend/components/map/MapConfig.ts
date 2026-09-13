@@ -72,6 +72,15 @@ export const MAP_LAYERS: Record<string, MapLayerConfig> = {
         available: true,
         description: 'Street light operational status',
         endpoint: '/api/v1/streetlights/assets'
+    },
+    INTELLIGENCE: {
+        key: 'INTELLIGENCE',
+        label: 'AI Command Center',
+        color: '#6366f1',
+        enabled: true,
+        available: true,
+        description: 'Correlated AI risk hotspots and systemic alerts',
+        endpoint: '/api/v1/intelligence/events'
     }
 };
 

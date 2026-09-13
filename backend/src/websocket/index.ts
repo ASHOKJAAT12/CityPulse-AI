@@ -67,6 +67,11 @@ export function initializeWebSocket(server: HttpServer): SocketIOServer {
     io.on('connection', (socket: Socket) => {
         logger.debug('WebSocket client connected', { socketId: socket.id, auth: socket.data.isAuthenticated });
 
+        if (socket.data.isAuthenticated && socket.data.user?.id) {
+            void socket.join(roomName.user(socket.data.user.id));
+            logger.debug('Client joined personal user room', { socketId: socket.id, userId: socket.data.user.id });
+        }
+
         // ── City Rooms ─────────────────────────────────────────────
         // Public-ish room — open to any connected client (citizens don't need auth for public data)
 

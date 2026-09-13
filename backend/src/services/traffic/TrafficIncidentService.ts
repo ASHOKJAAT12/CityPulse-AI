@@ -2,6 +2,7 @@ import { TrafficIncident, TrafficRoadClosure, TrafficRoadwork, TrafficRoad } fro
 import { AppError as ApiError } from '../../utils/AppError';
 import { getIO } from '../../websocket';
 import { WS_EVENTS } from '../../constants/events';
+import { notificationService, NotificationAudience } from '../notification/NotificationService';
 
 export class TrafficIncidentService {
 
@@ -24,6 +25,19 @@ export class TrafficIncidentService {
         // WebSocket
         const io = getIO();
         if (io) io.to(`city:${cityId}`).emit(WS_EVENTS.TRAFFIC_INCIDENT_CREATED, inc);
+
+        if (inc.severity === 'CRITICAL' || inc.severity === 'HIGH') {
+            await notificationService.send({
+                cityId: cityId,
+                audience: NotificationAudience.CITY,
+                category: 'TRAFFIC',
+                priority: inc.severity,
+                title: `Traffic Alert: ${inc.title || inc.type}`,
+                message: inc.description || `A new ${inc.severity.toLowerCase()} priority traffic incident has been reported.`,
+                referenceType: 'TRAFFIC_INCIDENT',
+                referenceId: inc._id.toString()
+            });
+        }
 
         return inc;
     }
