@@ -52,7 +52,7 @@ export default function GarbageDashboard() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight text-slate-900">Garbage Management</h1>
-                    <p className="text-slate-500 mt-2">Manage your city's garbage operational fleet and routes.</p>
+                    <p className="text-slate-500 mt-2">Manage your city&apos;s garbage operational fleet and routes.</p>
                 </div>
             </div>
 

@@ -24,10 +24,10 @@ export default function RegisterPage() {
     useEffect(() => {
         api.get('/cities/active').then(res => {
             if (res.data.success) {
-                const udaipurCities = res.data.data.filter((city: any) => city.name.toLowerCase().includes('udaipur'));
-                setCities(udaipurCities);
-                if (udaipurCities.length === 1) {
-                    setFormData(prev => ({ ...prev, cityId: udaipurCities[0].id || udaipurCities[0]._id }));
+                const activeCities = res.data.data;
+                setCities(activeCities);
+                if (activeCities.length === 1) {
+                    setFormData(prev => ({ ...prev, cityId: activeCities[0].id || activeCities[0]._id }));
                 }
             }
         }).catch(err => console.error(err));

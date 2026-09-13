@@ -66,6 +66,7 @@ export default function GarbageRouteEditor() {
 
     useEffect(() => {
         if (routeId) loadData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [routeId, user]);
 
     const showSuccess = (msg: string) => {

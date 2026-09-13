@@ -14,8 +14,8 @@ export const MAP_LAYERS: Record<string, MapLayerConfig> = {
         key: 'TRAFFIC',
         label: 'Traffic & Events',
         color: '#ef4444',
-        enabled: false,
-        available: false,
+        enabled: true,
+        available: true,
         description: 'Real-time traffic flow and incident reports',
         endpoint: '/api/v1/services/traffic'
     },
@@ -23,10 +23,10 @@ export const MAP_LAYERS: Record<string, MapLayerConfig> = {
         key: 'EV',
         label: 'EV Stations',
         color: '#10b981',
-        enabled: false,
-        available: false,
+        enabled: true,
+        available: true,
         description: 'Available electric vehicle charging stations',
-        endpoint: '/api/v1/services/ev'
+        endpoint: '/api/v1/ev/stations'
     },
     GARBAGE: {
         key: 'GARBAGE',
@@ -41,8 +41,8 @@ export const MAP_LAYERS: Record<string, MapLayerConfig> = {
         key: 'WATER',
         label: 'Water Lines',
         color: '#3b82f6',
-        enabled: false,
-        available: false,
+        enabled: true,
+        available: true,
         description: 'Water infrastructure and pipeline status',
         endpoint: '/api/v1/services/water'
     },
@@ -50,8 +50,8 @@ export const MAP_LAYERS: Record<string, MapLayerConfig> = {
         key: 'ELECTRICITY',
         label: 'Power Grid',
         color: '#eab308',
-        enabled: false,
-        available: false,
+        enabled: true,
+        available: true,
         description: 'Power grid sub-stations and outages',
         endpoint: '/api/v1/services/electricity'
     },
@@ -59,19 +59,19 @@ export const MAP_LAYERS: Record<string, MapLayerConfig> = {
         key: 'REPORTS',
         label: 'Citizen Reports',
         color: '#f97316',
-        enabled: false,
-        available: false,
+        enabled: true,
+        available: true,
         description: 'Issues reported by citizens',
-        endpoint: '/api/v1/services/reports'
+        endpoint: '/api/v1/reports/city/my'
     },
     STREET_LIGHT: {
         key: 'STREET_LIGHT',
         label: 'Street Lights',
         color: '#f59e0b',
-        enabled: false,
-        available: false,
+        enabled: true,
+        available: true,
         description: 'Street light operational status',
-        endpoint: '/api/v1/services/street-lights'
+        endpoint: '/api/v1/streetlights/assets'
     }
 };
 

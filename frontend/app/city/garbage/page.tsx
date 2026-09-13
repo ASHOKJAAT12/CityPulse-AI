@@ -34,6 +34,7 @@ export default function CitizenGarbagePage() {
             trackingSocket.off('garbage:vehicle-location-updated');
             trackingSocket.off('garbage:vehicle-status-updated');
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {

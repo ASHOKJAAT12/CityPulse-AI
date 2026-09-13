@@ -107,6 +107,31 @@ export function initializeWebSocket(server: HttpServer): SocketIOServer {
             void socket.leave(roomName.vehicle(vehicleId));
         });
 
+        // ── Water Rooms ────────────────────────────────────────────
+
+        socket.on('join:water-asset-room', (assetId: string) => {
+            // Let it be public for now or limit same as vehicle. The prompt says we have city rooms. 
+            // We can just verify if they want it open. Let's make it open to citizens without auth like city room?
+            // Or maybe they just listen. Let's make it joining.
+            void socket.join(roomName.waterAsset(assetId));
+        });
+
+        socket.on('leave:water-asset-room', (assetId: string) => {
+            void socket.leave(roomName.waterAsset(assetId));
+        });
+
+        socket.on('join:water-sensor-room', (sensorId: string) => {
+            if (!socket.data.isAuthenticated) {
+                socket.emit(WS_EVENTS.ERROR, { message: 'Authentication required to join sensor room' });
+                return;
+            }
+            void socket.join(roomName.waterSensor(sensorId));
+        });
+
+        socket.on('leave:water-sensor-room', (sensorId: string) => {
+            void socket.leave(roomName.waterSensor(sensorId));
+        });
+
         // ── Route Rooms (Admin) ────────────────────────────────────
 
         socket.on(WS_EVENTS.JOIN_ROUTE_ROOM, (routeId: string) => {

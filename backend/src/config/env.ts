@@ -34,6 +34,13 @@ const envSchema = z.object({
     STOP_ARRIVAL_RADIUS_METERS: z.string().default('50').transform(Number),
     VEHICLE_LOCATION_RETENTION_DAYS: z.string().default('7').transform(Number),
 
+    // Phase 6 - Water Simulator
+    WATER_SIMULATOR_ENABLED: z.string().optional().transform(val => val === 'true'),
+    WATER_SIMULATOR_INTERVAL_SECONDS: z.string().default('30').transform(Number),
+
+    // Phase 7 - Electricity Sandbox
+    ELECTRICITY_SIMULATOR_ENABLED: z.string().optional().transform(val => val === 'true'),
+    ELECTRICITY_SIMULATOR_INTERVAL_SECONDS: z.string().default('30').transform(Number),
 });
 
 export type Env = z.infer<typeof envSchema>;

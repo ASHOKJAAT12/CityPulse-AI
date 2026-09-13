@@ -179,3 +179,6 @@ export function MapPlaceholder({ className, label = 'Map' }: { className?: strin
         </div>
     );
 }
+
+export * from './WaterLayer';
+export * from './ElectricityLayer';

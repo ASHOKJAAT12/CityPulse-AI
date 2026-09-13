@@ -30,5 +30,28 @@ router.use('/garbage', garbageRoutes);
 router.use('/garbage', trackingRoutes);
 router.use('/garbage/public', publicGarbageRoutes);
 
-export default router;
+// Phase 6 - Water Management
+import waterRoutes from './water.routes';
+router.use('/water', waterRoutes);
 
+// Phase 7 - Electricity Management
+import electricityRoutes from './electricity.routes';
+router.use('/electricity', electricityRoutes);
+
+// Phase 8 - Traffic Management
+import trafficRoutes from './traffic.routes';
+router.use('/traffic', trafficRoutes);
+
+// Phase 9 - EV Management
+import evRoutes from './ev.routes';
+router.use('/ev', evRoutes);
+
+// Phase 10 - Streetlight Management
+import streetlightRoutes from './streetlight.routes';
+router.use('/streetlights', streetlightRoutes);
+
+// Phase 11 - Reports Management
+import reportRoutes from './report.routes';
+router.use('/reports', reportRoutes);
+
+export default router;

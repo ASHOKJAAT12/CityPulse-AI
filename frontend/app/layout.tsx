@@ -13,6 +13,10 @@ export const metadata: Metadata = {
     robots: 'noindex, nofollow', // Private platform — no search indexing
 };
 
+import { Inter } from 'next/font/google';
+
+const inter = Inter({ subsets: ['latin'] });
+
 export default function RootLayout({
     children,
 }: {
@@ -21,14 +25,8 @@ export default function RootLayout({
     return (
         <html lang="en" suppressHydrationWarning>
             <head>
-                <link rel="preconnect" href="https://fonts.googleapis.com" />
-                <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-                <link
-                    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
-                    rel="stylesheet"
-                />
             </head>
-            <body className="min-h-screen bg-surface-50 dark:bg-surface-950 antialiased">
+            <body className={`${inter.className} min-h-screen bg-surface-50 dark:bg-surface-950 antialiased`}>
                 {children}
                 <Toaster
                     position="top-right"

@@ -42,6 +42,7 @@ export default function LiveTrackingPage() {
             trackingSocket.off('garbage:vehicle-location-updated');
             trackingSocket.off('garbage:vehicle-status-updated');
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     async function loadData() {
