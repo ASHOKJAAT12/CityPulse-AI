@@ -4,6 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { ArrowLeft, Activity, Users, Settings, MessageSquare, MapPin, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Image from 'next/image';
 
 export default function ReportDetailPage() {
     const params = useParams();
@@ -25,8 +26,8 @@ export default function ReportDetailPage() {
     };
 
     useEffect(() => {
-        if (!params.id) return;
-        fetchDetails();
+        if (params.id) fetchDetails();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [params.id]);
 
     const handleComment = async (e: React.FormEvent) => {

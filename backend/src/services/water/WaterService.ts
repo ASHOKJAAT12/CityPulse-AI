@@ -1,11 +1,8 @@
-import { Types } from 'mongoose';
 import { AppError } from '../../utils/AppError';
 import { intelligenceBus } from '../intelligence/IntelligenceEventEmitter';
 import { WaterAsset, WaterSensor, WaterSensorReading, WaterIncident, WaterSupplySchedule } from '../../models';
 import { emitToCityRoom } from '../../websocket';
 import { notificationService, NotificationAudience } from '../notification/NotificationService';
-import { WS_EVENTS } from '../../constants/events';
-import logger from '../../utils/logger';
 
 export class WaterService {
     // ─── ASSETS ─────────────────────────────────────────────────────────────

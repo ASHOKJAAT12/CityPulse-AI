@@ -53,3 +53,12 @@ export function healthCheck(req: Request, res: Response): void {
         isHealthy ? 200 : 503
     );
 }
+
+export function readyCheck(req: Request, res: Response): void {
+    const readyState = mongoose.connection.readyState;
+    if ((readyState as unknown as number) !== 1) {
+        res.status(503).json({ success: false, message: 'Database not ready', errorCode: 'SERVICE_UNAVAILABLE' });
+        return;
+    }
+    res.status(200).json({ success: true, message: 'System is ready', data: { status: 'ready' } });
+}

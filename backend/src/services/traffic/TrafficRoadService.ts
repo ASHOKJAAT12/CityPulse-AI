@@ -97,7 +97,7 @@ export class TrafficRoadService {
         await signal.save();
 
         // Update intersection to reflect signal
-        inter.signalId = signal._id as any;
+        inter.signalId = signal._id;
         await inter.save();
 
         return signal;

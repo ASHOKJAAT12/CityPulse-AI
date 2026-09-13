@@ -37,8 +37,9 @@ export default function IntelligenceEventDetail() {
     };
 
     useEffect(() => {
-        if (user && eventId) fetchData();
-    }, [user, eventId]);
+        if (params.id) fetchData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [params.id]);
 
     const handleUpdateStatus = async (newStatus: string) => {
         if (!confirm(`Are you sure you want to mark this intelligence event as ${newStatus}?`)) return;
@@ -80,9 +81,9 @@ export default function IntelligenceEventDetail() {
                     <div>
                         <div className="flex items-center gap-3 mb-2">
                             <span className={`px-3 py-1 rounded-full text-xs font-bold ${event.severity === 'CRITICAL' ? 'bg-red-100 text-red-800 border border-red-200' :
-                                    event.severity === 'HIGH' ? 'bg-orange-100 text-orange-800 border border-orange-200' :
-                                        event.severity === 'MEDIUM' ? 'bg-amber-100 text-amber-800 border border-amber-200' :
-                                            'bg-indigo-100 text-indigo-800 border border-indigo-200'
+                                event.severity === 'HIGH' ? 'bg-orange-100 text-orange-800 border border-orange-200' :
+                                    event.severity === 'MEDIUM' ? 'bg-amber-100 text-amber-800 border border-amber-200' :
+                                        'bg-indigo-100 text-indigo-800 border border-indigo-200'
                                 }`}>
                                 {event.severity} RISK
                             </span>

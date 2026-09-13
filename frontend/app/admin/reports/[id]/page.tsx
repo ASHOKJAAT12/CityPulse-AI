@@ -4,6 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { ArrowLeft, Activity, Users, Settings, MessageSquare, MapPin } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Image from 'next/image';
 
 export default function AdminReportDetailPage() {
     const params = useParams();
@@ -39,8 +40,8 @@ export default function AdminReportDetailPage() {
     };
 
     useEffect(() => {
-        if (!params.id) return;
-        fetchDetails();
+        if (params.id) fetchDetails();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [params.id]);
 
     const handleUpdate = async () => {
@@ -116,9 +117,11 @@ export default function AdminReportDetailPage() {
                                 <div className="flex gap-4 overflow-x-auto">
                                     {report.attachments.map((file: any, i: number) => (
                                         <a href={api.defaults.baseURL?.replace('/api/v1', '') + file.url || file.url} target="_blank" rel="noreferrer" key={i}>
-                                            <img
+                                            <Image
                                                 src={api.defaults.baseURL?.replace('/api/v1', '') + file.url || file.url}
                                                 alt="Attachment"
+                                                width={192}
+                                                height={128}
                                                 className="h-32 w-48 object-cover rounded-lg border shadow-sm flex-shrink-0 cursor-pointer hover:opacity-80 transition"
                                             />
                                         </a>

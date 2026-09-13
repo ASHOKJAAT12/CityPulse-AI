@@ -21,7 +21,7 @@ export class WaterController {
     static async getAsset(req: Request, res: Response, next: NextFunction) {
         try {
             const cityId = req.user?.cityId || req.params['cityId'];
-            const asset = await WaterService.getAssetById(cityId, req.params['id'] as string);
+            const asset = await WaterService.getAssetById(cityId, req.params['id']);
             res.status(200).json({ status: 'success', data: asset });
         } catch (error) {
             next(error);
@@ -43,7 +43,7 @@ export class WaterController {
         try {
             const cityId = req.user?.cityId || req.params['cityId'];
             const validated = updateWaterAssetSchema.parse(req.body);
-            const asset = await WaterService.updateAsset(cityId, req.params['id'] as string, validated);
+            const asset = await WaterService.updateAsset(cityId, req.params['id'], validated);
             res.status(200).json({ status: 'success', data: asset });
         } catch (error) {
             next(error);
@@ -53,7 +53,7 @@ export class WaterController {
     static async deleteAsset(req: Request, res: Response, next: NextFunction) {
         try {
             const cityId = req.user?.cityId || req.params['cityId'];
-            await WaterService.deleteAsset(cityId, req.params['id'] as string);
+            await WaterService.deleteAsset(cityId, req.params['id']);
             res.status(204).send();
         } catch (error) {
             next(error);
@@ -76,7 +76,7 @@ export class WaterController {
     static async getSensor(req: Request, res: Response, next: NextFunction) {
         try {
             const cityId = req.user?.cityId || req.params['cityId'];
-            const sensor = await WaterService.getSensorById(cityId, req.params['id'] as string);
+            const sensor = await WaterService.getSensorById(cityId, req.params['id']);
             res.status(200).json({ status: 'success', data: sensor });
         } catch (error) {
             next(error);
@@ -98,7 +98,7 @@ export class WaterController {
         try {
             const cityId = req.user?.cityId || req.params['cityId'];
             const validated = updateWaterSensorSchema.parse(req.body);
-            const sensor = await WaterService.updateSensor(cityId, req.params['id'] as string, validated);
+            const sensor = await WaterService.updateSensor(cityId, req.params['id'], validated);
             res.status(200).json({ status: 'success', data: sensor });
         } catch (error) {
             next(error);
@@ -115,7 +115,7 @@ export class WaterController {
                 ...validated,
                 source: req.user ? (req.user.role === 'SUPER_ADMIN' || req.user.role === 'CITY_ADMIN' ? 'ADMIN' : 'API') : 'API'
             };
-            const reading = await WaterService.ingestReading(cityId, req.params['id'] as string, readingData);
+            const reading = await WaterService.ingestReading(cityId, req.params['id'], readingData);
             res.status(201).json({ status: 'success', data: reading });
         } catch (error) {
             next(error);
@@ -129,7 +129,7 @@ export class WaterController {
             const startTime = req.query['startTime'] ? new Date(req.query['startTime'] as string) : undefined;
             const endTime = req.query['endTime'] ? new Date(req.query['endTime'] as string) : undefined;
 
-            const readings = await WaterService.getSensorHistory(cityId, req.params['id'] as string, limit, startTime, endTime);
+            const readings = await WaterService.getSensorHistory(cityId, req.params['id'], limit, startTime, endTime);
             res.status(200).json({ status: 'success', data: readings });
         } catch (error) {
             next(error);
@@ -165,7 +165,7 @@ export class WaterController {
         try {
             const cityId = req.user?.cityId || req.params['cityId'];
             const validated = updateWaterIncidentSchema.parse(req.body);
-            const incident = await WaterService.updateIncident(cityId, req.params['id'] as string, validated);
+            const incident = await WaterService.updateIncident(cityId, req.params['id'], validated);
             res.status(200).json({ status: 'success', data: incident });
         } catch (error) {
             next(error);
@@ -199,7 +199,7 @@ export class WaterController {
         try {
             const cityId = req.user?.cityId || req.params['cityId'];
             const validated = updateWaterSupplyScheduleSchema.parse(req.body);
-            const schedule = await WaterService.updateSchedule(cityId, req.params['id'] as string, validated);
+            const schedule = await WaterService.updateSchedule(cityId, req.params['id'], validated);
             res.status(200).json({ status: 'success', data: schedule });
         } catch (error) {
             next(error);
@@ -209,7 +209,7 @@ export class WaterController {
     static async deleteSchedule(req: Request, res: Response, next: NextFunction) {
         try {
             const cityId = req.user?.cityId || req.params['cityId'];
-            await WaterService.deleteSchedule(cityId, req.params['id'] as string);
+            await WaterService.deleteSchedule(cityId, req.params['id']);
             res.status(204).send();
         } catch (error) {
             next(error);

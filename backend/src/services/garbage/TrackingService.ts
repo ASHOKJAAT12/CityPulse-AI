@@ -175,7 +175,7 @@ export class TrackingService {
             const ageSeconds = (Date.now() - vehicle.lastLocationAt.getTime()) / 1000;
             if (ageSeconds < 60) {
                 const distKm = EtaService.distanceKm(
-                    vehicle.currentLocation.coordinates as [number, number],
+                    vehicle.currentLocation.coordinates,
                     [payload.longitude, payload.latitude]
                 );
                 if (distKm > 50) {

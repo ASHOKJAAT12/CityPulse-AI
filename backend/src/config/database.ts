@@ -23,6 +23,11 @@ export async function connectDatabase(): Promise<void> {
 
         await mongoose.connect(uri, {
             dbName,
+            maxPoolSize: 100,
+            minPoolSize: 10,
+            serverSelectionTimeoutMS: 5000,
+            socketTimeoutMS: 45000,
+            autoIndex: env.NODE_ENV !== 'production' // Don't auto build indexes heavily in prod startups
         });
     } catch (error) {
         logger.error('❌ Failed to connect to MongoDB', { error });

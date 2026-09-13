@@ -30,6 +30,7 @@ export default function NotificationsPage() {
     useEffect(() => {
         if (!accessToken) return;
         fetchNotifications(1);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [accessToken]);
 
     useEffect(() => {
@@ -126,7 +127,7 @@ export default function NotificationsPage() {
                         <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
                             <Bell className="w-8 h-8 text-slate-300" />
                         </div>
-                        <h3 className="text-lg font-medium text-slate-700">You're all caught up!</h3>
+                        <h3 className="text-lg font-medium text-slate-700">You&apos;re all caught up!</h3>
                         <p className="text-slate-500 mt-2">There are no new notifications to display right now.</p>
                     </div>
                 ) : (
@@ -155,7 +156,7 @@ export default function NotificationsPage() {
 
                                     <div className="flex items-center justify-between">
                                         <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium tracking-wide ${notif.priority === 'CRITICAL' || notif.priority === 'HIGH' ? 'bg-rose-100 text-rose-700' :
-                                                notif.priority === 'MEDIUM' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'
+                                            notif.priority === 'MEDIUM' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'
                                             }`}>
                                             {notif.category}
                                         </span>

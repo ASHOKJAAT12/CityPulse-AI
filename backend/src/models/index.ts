@@ -67,9 +67,18 @@ export { NotificationPreference, INotificationPreference } from './NotificationP
 
 // Phase 13 AI Models
 export * from './IntelligenceEvent';
+export * from './AnalyticsMetric';
 export * from './AnomalyDetection';
 export * from './RiskAssessment';
 export * from './Prediction';
 export * from './Recommendation';
 export * from './IntelligenceFeedback';
 export * from './IntelligenceModelConfig';
+
+// Phase 14 - Emergency Response
+export * from './EmergencyIncident';
+export * from './ResponseTeam';
+export * from './EmergencyResource';
+export * from './EmergencyAssignment';
+export * from './EmergencyTimeline';
+export * from './EmergencyCorrelation';

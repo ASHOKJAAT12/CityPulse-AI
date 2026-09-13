@@ -12,7 +12,7 @@ export class CorrelationEngine {
         // Temporal Window (Last 4 Hours)
         const timeWindow = new Date(Date.now() - 4 * 60 * 60 * 1000);
 
-        let targetLocation: any = null;
+        const targetLocation: any = null;
 
         // 1. Fetch location for the anomaly source if it's geospatial
         if (anomaly.service === 'WATER' || anomaly.service === 'ELECTRICITY' || anomaly.service === 'STREETLIGHT' || anomaly.service === 'TRAFFIC') {

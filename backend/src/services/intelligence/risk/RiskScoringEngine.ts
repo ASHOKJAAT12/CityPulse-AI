@@ -5,7 +5,7 @@ import mongoose from 'mongoose';
 export class RiskScoringEngine {
     static async calculate(intelligenceEvent: any): Promise<void> {
         let impactScore = 50;
-        let likelihoodScore = intelligenceEvent.confidence;
+        const likelihoodScore = intelligenceEvent.confidence;
 
         // Arbitrary business logic for Risk Scoring based on Service Type
         if (intelligenceEvent.service === 'ELECTRICITY') impactScore += 30; // Grid is critical

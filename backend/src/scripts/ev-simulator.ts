@@ -58,7 +58,7 @@ async function runSimulator() {
         await connectDatabase();
         console.log('🚀 Connected to Database for EV Simulation');
 
-        let city = await City.findOne();
+        const city = await City.findOne();
         if (!city) {
             console.error('❌ No City found in database. Exiting Simulator.');
             process.exit(1);

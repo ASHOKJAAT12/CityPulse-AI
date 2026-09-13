@@ -89,7 +89,7 @@ export class NotificationService {
                     ],
                     status: 'ACTIVE'
                 }, '_id').lean();
-                targets = cityUsers.map(u => u._id as Types.ObjectId);
+                targets = cityUsers.map(u => u._id);
                 break;
 
             case NotificationAudience.ROLE:
@@ -102,7 +102,7 @@ export class NotificationService {
                     role: payload.role,
                     status: 'ACTIVE'
                 }, '_id').lean();
-                targets = roleUsers.map(u => u._id as Types.ObjectId);
+                targets = roleUsers.map(u => u._id);
                 break;
 
             case NotificationAudience.DEPARTMENT:

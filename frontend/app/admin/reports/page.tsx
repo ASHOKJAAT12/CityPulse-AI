@@ -31,6 +31,7 @@ export default function AdminReportsPage() {
 
     useEffect(() => {
         fetchReports();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [statusFilter, priorityFilter]);
 
     const getStatusBadge = (status: string) => {

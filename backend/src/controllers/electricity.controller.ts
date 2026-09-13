@@ -27,7 +27,7 @@ export class ElectricityController {
     static async getAsset(req: Request, res: Response, next: NextFunction) {
         try {
             const cityId = req.user?.cityId || req.params['cityId'];
-            const asset = await ElectricityAssetService.getAssetById(cityId, req.params['id'] as string);
+            const asset = await ElectricityAssetService.getAssetById(cityId, req.params['id']);
             res.status(200).json({ status: 'success', data: asset });
         } catch (error) { next(error); }
     }
@@ -45,7 +45,7 @@ export class ElectricityController {
         try {
             const cityId = req.user?.cityId || req.params['cityId'];
             const validated = updateElectricityAssetSchema.parse(req.body);
-            const asset = await ElectricityAssetService.updateAsset(cityId, req.params['id'] as string, validated);
+            const asset = await ElectricityAssetService.updateAsset(cityId, req.params['id'], validated);
             res.status(200).json({ status: 'success', data: asset });
         } catch (error) { next(error); }
     }
@@ -53,7 +53,7 @@ export class ElectricityController {
     static async deleteAsset(req: Request, res: Response, next: NextFunction) {
         try {
             const cityId = req.user?.cityId || req.params['cityId'];
-            await ElectricityAssetService.deleteAsset(cityId, req.params['id'] as string);
+            await ElectricityAssetService.deleteAsset(cityId, req.params['id']);
             res.status(204).send();
         } catch (error) { next(error); }
     }
@@ -72,7 +72,7 @@ export class ElectricityController {
     static async getSensor(req: Request, res: Response, next: NextFunction) {
         try {
             const cityId = req.user?.cityId || req.params['cityId'];
-            const sensor = await ElectricityAssetService.getSensorById(cityId, req.params['id'] as string);
+            const sensor = await ElectricityAssetService.getSensorById(cityId, req.params['id']);
             res.status(200).json({ status: 'success', data: sensor });
         } catch (error) { next(error); }
     }
@@ -90,7 +90,7 @@ export class ElectricityController {
         try {
             const cityId = req.user?.cityId || req.params['cityId'];
             const validated = updateElectricitySensorSchema.parse(req.body);
-            const sensor = await ElectricityAssetService.updateSensor(cityId, req.params['id'] as string, validated);
+            const sensor = await ElectricityAssetService.updateSensor(cityId, req.params['id'], validated);
             res.status(200).json({ status: 'success', data: sensor });
         } catch (error) { next(error); }
     }
@@ -105,7 +105,7 @@ export class ElectricityController {
                 ...validated,
                 source: req.user ? (req.user.role === 'SUPER_ADMIN' || req.user.role === 'CITY_ADMIN' ? 'ADMIN' : 'API') : 'API'
             };
-            const reading = await ElectricityTelemetryService.ingestReading(cityId, req.params['id'] as string, readingData);
+            const reading = await ElectricityTelemetryService.ingestReading(cityId, req.params['id'], readingData);
             res.status(201).json({ status: 'success', data: reading });
         } catch (error) { next(error); }
     }
@@ -116,7 +116,7 @@ export class ElectricityController {
             const limit = parseInt(req.query['limit'] as string) || 100;
             const startTime = req.query['startTime'] ? new Date(req.query['startTime'] as string) : undefined;
             const endTime = req.query['endTime'] ? new Date(req.query['endTime'] as string) : undefined;
-            const readings = await ElectricityAssetService.getSensorHistory(cityId, req.params['id'] as string, limit, startTime, endTime);
+            const readings = await ElectricityAssetService.getSensorHistory(cityId, req.params['id'], limit, startTime, endTime);
             res.status(200).json({ status: 'success', data: readings });
         } catch (error) { next(error); }
     }
@@ -146,7 +146,7 @@ export class ElectricityController {
         try {
             const cityId = req.user?.cityId || req.params['cityId'];
             const validated = updateElectricityIncidentSchema.parse(req.body);
-            const incident = await ElectricityTelemetryService.updateIncident(cityId, req.params['id'] as string, validated);
+            const incident = await ElectricityTelemetryService.updateIncident(cityId, req.params['id'], validated);
             res.status(200).json({ status: 'success', data: incident });
         } catch (error) { next(error); }
     }
@@ -166,7 +166,7 @@ export class ElectricityController {
     static async getOutage(req: Request, res: Response, next: NextFunction) {
         try {
             const cityId = req.user?.cityId || req.params['cityId'];
-            const outage = await OutageService.getOutageById(cityId, req.params['id'] as string);
+            const outage = await OutageService.getOutageById(cityId, req.params['id']);
             res.status(200).json({ status: 'success', data: outage });
         } catch (error) { next(error); }
     }
@@ -184,7 +184,7 @@ export class ElectricityController {
         try {
             const cityId = req.user?.cityId || req.params['cityId'];
             const validated = updatePowerOutageSchema.parse(req.body);
-            const outage = await OutageService.updateOutage(cityId, req.params['id'] as string, validated);
+            const outage = await OutageService.updateOutage(cityId, req.params['id'], validated);
             res.status(200).json({ status: 'success', data: outage });
         } catch (error) { next(error); }
     }
@@ -214,7 +214,7 @@ export class ElectricityController {
         try {
             const cityId = req.user?.cityId || req.params['cityId'];
             const validated = updateElectricityMaintenanceSchema.parse(req.body);
-            const maintenance = await OutageService.updateMaintenance(cityId, req.params['id'] as string, validated);
+            const maintenance = await OutageService.updateMaintenance(cityId, req.params['id'], validated);
             res.status(200).json({ status: 'success', data: maintenance });
         } catch (error) { next(error); }
     }
