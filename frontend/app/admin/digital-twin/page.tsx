@@ -10,6 +10,7 @@ const Marker = dynamic(() => import('../../../components/map').then(m => m.Marke
 export default function DigitalTwinPage() {
     const [nodes, setNodes] = useState<any[]>([]);
     const [relationships, setRelationships] = useState<any[]>([]);
+    const [risks, setRisks] = useState<any[]>([]);
     const [summary, setSummary] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [selectedNode, setSelectedNode] = useState<any>(null);
@@ -17,13 +18,15 @@ export default function DigitalTwinPage() {
     useEffect(() => {
         const fetchInitialState = async () => {
             try {
-                const [sumRes, nodesRes] = await Promise.all([
+                const [sumRes, nodesRes, riskRes] = await Promise.all([
                     api.get('/digital-twin/summary'),
-                    api.get('/digital-twin/nodes?limit=1000') // Bounded spatial load
+                    api.get('/digital-twin/nodes?limit=1000'), // Bounded spatial load
+                    api.get('/predictions/risk-map') // Phase 18 Prediction Integration
                 ]);
 
                 if (sumRes.data.success) setSummary(sumRes.data.data);
                 if (nodesRes.data.success) setNodes(nodesRes.data.data.nodes);
+                if (riskRes.data) setRisks(riskRes.data);
             } catch (err) {
                 console.error("Failed to load Digital Twin", err);
             } finally {
@@ -63,15 +66,19 @@ export default function DigitalTwinPage() {
             {/* Viewport Map Area */}
             <div className="flex-1 relative">
                 <MapView center={{ lat: 20.5937, lng: 78.9629 }} zoom={5} className="w-full h-full">
-                    {nodes.map(node => (
-                        <Marker
-                            key={node._id}
-                            position={{ lat: node.location.coordinates[1], lng: node.location.coordinates[0] }}
-                            label={node.name}
-                            icon={node.status === 'CRITICAL' ? 'alert' : 'default'}
-                            onClick={() => handleNodeSelect(node)}
-                        />
-                    ))}
+                    {nodes.map(node => {
+                        const matchingRisk = risks.find(r => r.assetId === node.entityId);
+                        const isAtRisk = !!matchingRisk;
+                        return (
+                            <Marker
+                                key={node._id}
+                                position={{ lat: node.location.coordinates[1], lng: node.location.coordinates[0] }}
+                                label={isAtRisk ? `[PREDICTED RISK] ${node.name}` : node.name}
+                                icon={isAtRisk ? 'alert' : (node.status === 'CRITICAL' ? 'alert' : 'default')}
+                                onClick={() => handleNodeSelect({ ...node, predictiveRisk: matchingRisk })}
+                            />
+                        );
+                    })}
                 </MapView>
 
                 {/* Heads Up Display Overlay */}
@@ -119,6 +126,27 @@ export default function DigitalTwinPage() {
                                     </span>
                                 </div>
                             </div>
+
+                            {/* Phase 18 - Predictive Risk Overlay */}
+                            {selectedNode.predictiveRisk && (
+                                <div className="bg-orange-50 border border-orange-200 p-4 rounded-xl relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 p-3 opacity-10">
+                                        <Activity className="w-16 h-16 text-orange-600" />
+                                    </div>
+                                    <h4 className="font-bold text-orange-700 text-sm mb-2 flex items-center gap-2 uppercase tracking-wide">
+                                        AI Risk Assessment
+                                    </h4>
+                                    <div className="font-medium text-slate-700 mt-1">
+                                        {selectedNode.predictiveRisk.predictionType} predicted {selectedNode.predictiveRisk.predictionHorizon}.
+                                    </div>
+                                    <div className="text-sm font-bold text-orange-600 mt-2">
+                                        Confidence: {selectedNode.predictiveRisk.confidence}% &bull; Severity: {selectedNode.predictiveRisk.severity}
+                                    </div>
+                                    <div className="mt-3 text-xs text-orange-600/70 py-1 px-2 bg-orange-100 rounded inline-block font-mono">
+                                        Model: {selectedNode.predictiveRisk.modelName}
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Topological Graph Preview */}
                             {relationships.length > 0 && (

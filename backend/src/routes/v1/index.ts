@@ -71,4 +71,23 @@ router.use('/digital-twin', digitalTwinRoutes);
 import emergencyRoutes from './emergency.routes';
 router.use('/emergency', emergencyRoutes);
 
+// Phase 18 - Predictive Maintenance & AI Registry
+import aiModelRoutes from './aiModel.routes';
+import aiPredictionRoutes from './aiPrediction.routes';
+import iotRoutes from './iot.routes';
+import optimizationRoutes from './optimization.routes';
+import { AIPredictionController } from '../../controllers/admin/AIPredictionController';
+import { authenticate, requireRole } from '../../middleware/auth';
+import { Role } from '../../constants/roles';
+
+router.use('/ai/models', aiModelRoutes);
+router.use('/predictions', aiPredictionRoutes);
+
+// Phase 19 - IoT Ingestion & Admin
+router.use('/iot', iotRoutes);
+
+router.use('/optimization', optimizationRoutes);
+
+router.get('/predictive-maintenance', authenticate, requireRole(Role.SUPER_ADMIN, Role.CITY_ADMIN), AIPredictionController.getPredictiveMaintenance);
+
 export default router;

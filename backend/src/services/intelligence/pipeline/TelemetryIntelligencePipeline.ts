@@ -30,6 +30,7 @@ export class TelemetryIntelligencePipeline {
 
         intelligenceBus.on('report:created', async (report: any) => {
             try {
+                // eslint-disable-next-line @typescript-eslint/no-var-requires
                 const { CitizenReportIntelligenceEngine } = require('../anomaly/CitizenReportIntelligenceEngine');
                 await CitizenReportIntelligenceEngine.detectHotspot(report);
             } catch (err) {
@@ -39,6 +40,7 @@ export class TelemetryIntelligencePipeline {
 
         intelligenceBus.on('garbage:location-recorded', async (payload: any) => {
             try {
+                // eslint-disable-next-line @typescript-eslint/no-var-requires
                 const { GarbageIntelligenceEngine } = require('../anomaly/GarbageIntelligenceEngine');
                 await GarbageIntelligenceEngine.detectAnomalies(payload);
             } catch (err) {
@@ -49,9 +51,13 @@ export class TelemetryIntelligencePipeline {
         // ── 2. Intelligence Cascade Layer ────────────────────────
         intelligenceBus.on('anomaly:detected', async (anomaly: any) => {
             try {
+                // eslint-disable-next-line @typescript-eslint/no-var-requires
                 const { CorrelationEngine } = require('../correlation/CorrelationEngine');
+                // eslint-disable-next-line @typescript-eslint/no-var-requires
                 const { RiskScoringEngine } = require('../risk/RiskScoringEngine');
+                // eslint-disable-next-line @typescript-eslint/no-var-requires
                 const { PredictionEngine } = require('../prediction/PredictionEngine');
+                // eslint-disable-next-line @typescript-eslint/no-var-requires
                 const { RecommendationEngine } = require('../recommendation/RecommendationEngine');
 
                 const intelligenceEvent = await CorrelationEngine.correlate(anomaly);

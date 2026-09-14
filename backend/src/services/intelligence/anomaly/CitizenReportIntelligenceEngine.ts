@@ -70,6 +70,7 @@ export class CitizenReportIntelligenceEngine {
 
             await anomaly.save();
 
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
             const { intelligenceBus } = require('../IntelligenceEventEmitter');
             intelligenceBus.emit('anomaly:detected', anomaly);
         }

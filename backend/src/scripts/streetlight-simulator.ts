@@ -46,4 +46,4 @@ async function runSimulator() {
     }, 4000);
 }
 
-runSimulator();
+runSimulator().catch(console.error);

@@ -92,6 +92,7 @@ export class IntelligenceController {
         if (!event) throw AppError.notFound('Intelligence Event not found');
 
         // Optional: Save interaction to IntelligenceFeedback for tuning
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
         const { IntelligenceFeedback } = require('../../models/IntelligenceFeedback');
         await IntelligenceFeedback.create({
             cityId,

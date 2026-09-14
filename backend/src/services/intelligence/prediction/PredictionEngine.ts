@@ -1,41 +1,40 @@
-import { Prediction } from '../../../models/Prediction';
-import mongoose from 'mongoose';
+import { AdvancedPredictiveEngine } from './AdvancedPredictiveEngine';
+import { TrafficSensorReading, WaterSensorReading, ElectricitySensorReading, StreetlightSensorReading, EVStationReading } from '../../../models';
 
 export class PredictionEngine {
     static async generate(intelligenceEvent: any): Promise<void> {
-        // Initial statistical forecasting layer
+        // Prepare historical telemetry based on service to feed the Advanced Engine
+        let historicalData: number[] = [];
 
-        let forecastedMetric = '';
-        let forecastedValue = 0;
-        let predictionType = 'SERVICE_DEGRADATION';
+        try {
+            if (intelligenceEvent.service === 'WATER') {
+                const history = await WaterSensorReading.find({ sensorId: intelligenceEvent.sourceId }).sort({ recordedAt: -1 }).limit(100).lean();
+                historicalData = history.map(r => r.value).reverse();
+            } else if (intelligenceEvent.service === 'ELECTRICITY') {
+                const history = await ElectricitySensorReading.find({ sensorId: intelligenceEvent.sourceId }).sort({ recordedAt: -1 }).limit(100).lean();
+                historicalData = history.map(r => r.value).reverse();
+            } else if (intelligenceEvent.service === 'TRAFFIC') {
+                const history = await TrafficSensorReading.find({ sensorId: intelligenceEvent.sourceId }).sort({ recordedAt: -1 }).limit(100).lean();
+                historicalData = history.map(r => r.value).reverse();
+            } else if (intelligenceEvent.service === 'STREETLIGHT') {
+                const history = await StreetlightSensorReading.find({ sensorId: intelligenceEvent.sourceId }).sort({ recordedAt: -1 }).limit(100).lean();
+                historicalData = history.map(r => r.value).reverse();
+            } else if (intelligenceEvent.service === 'EV') {
+                const history = await EVStationReading.find({ stationId: intelligenceEvent.sourceId }).sort({ recordedAt: -1 }).limit(100).lean();
+                historicalData = history.map((r: any) => r.powerKw || r.temperature || 0).reverse();
+            }
 
-        if (intelligenceEvent.service === 'TRAFFIC') {
-            predictionType = 'CONGESTION';
-            forecastedMetric = 'SPEED_DECREASE_PERCENTAGE';
-            forecastedValue = 25; // Static estimation placeholder for rule-based engine
-        } else if (intelligenceEvent.service === 'WATER') {
-            predictionType = 'FAILURE_RISK';
-            forecastedMetric = 'OUTAGE_PROBABILITY';
-            forecastedValue = intelligenceEvent.riskScore > 60 ? 80 : 30; // 80% failure risk
-        } else {
-            // General degradation
-            return;
+            // Pipe into the newly implemented Baseline / Evaluation Engine
+            await AdvancedPredictiveEngine.generateMaintenanceRisk({
+                cityId: intelligenceEvent.cityId,
+                service: intelligenceEvent.service,
+                assetType: 'INFRASTRUCTURE_ASSET',
+                assetId: intelligenceEvent.sourceId,
+                historicalData,
+                recentAnomalies: [intelligenceEvent] // Treat uncorrelated AI risk as recent anomaly
+            });
+        } catch (error) {
+            console.error('PredictionEngine Data Linkage Error:', error);
         }
-
-        const prediction = new Prediction({
-            cityId: intelligenceEvent.cityId,
-            service: intelligenceEvent.service,
-            metric: forecastedMetric,
-            sourceType: 'INTELLIGENCE_EVENT',
-            sourceId: intelligenceEvent._id,
-            predictionType,
-            predictedValue: forecastedValue,
-            predictionTime: new Date(Date.now() + 60 * 60 * 1000), // Next hour forecast
-            confidence: Math.round(intelligenceEvent.confidence * 0.8), // Decayed confidence for future
-            modelVersion: 'static-rules-v1',
-            status: 'ACTIVE'
-        });
-
-        await prediction.save();
     }
 }

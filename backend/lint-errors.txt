@@ -1,0 +1,118 @@
+﻿
+C:\Users\Ashok\Desktop\CityPulse AI\backend\src\controllers\NotificationController.ts
+  3:10  error  'Types' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Ashok\Desktop\CityPulse AI\backend\src\controllers\analytics.controller.ts
+  7:10  error  'Types' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Ashok\Desktop\CityPulse AI\backend\src\controllers\digitalTwin.controller.ts
+   3:52  error  'DigitalTwinSnapshot' is defined but never used    @typescript-eslint/no-unused-vars
+  24:13  error  'filter' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Users\Ashok\Desktop\CityPulse AI\backend\src\controllers\intelligence.controller.ts
+  95:42  error  Require statement not part of import statement  @typescript-eslint/no-var-requires
+
+C:\Users\Ashok\Desktop\CityPulse AI\backend\src\controllers\report.controller.ts
+  3:10  error  'DepartmentService' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Ashok\Desktop\CityPulse AI\backend\src\middleware\authRateLimit.ts
+  1:10  error  'Request' is defined but never used   @typescript-eslint/no-unused-vars
+  1:19  error  'Response' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Ashok\Desktop\CityPulse AI\backend\src\routes\v1\garbage.routes.ts
+  3:37  error  'requireCityAccess' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Ashok\Desktop\CityPulse AI\backend\src\routes\v1\traffic.routes.ts
+  14:5  error  'updateSensorSchema' is defined but never used    @typescript-eslint/no-unused-vars
+  17:5  error  'updateIncidentSchema' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Ashok\Desktop\CityPulse AI\backend\src\scripts\electricity-simulator.ts
+  1:8  error  'mongoose' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Ashok\Desktop\CityPulse AI\backend\src\scripts\ev-simulator.ts
+  132:1  error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+
+C:\Users\Ashok\Desktop\CityPulse AI\backend\src\scripts\streetlight-simulator.ts
+  49:1  error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+
+C:\Users\Ashok\Desktop\CityPulse AI\backend\src\scripts\traffic-simulator.ts
+    4:8  error  'mongoose' is defined but never used                                                                                                                                @typescript-eslint/no-unused-vars
+  109:1  error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+
+C:\Users\Ashok\Desktop\CityPulse AI\backend\src\scripts\water-simulator.ts
+  1:8  error  'mongoose' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Ashok\Desktop\CityPulse AI\backend\src\services\analytics\CityKPIEngine.ts
+   1:10  error  'AnalyticsMetric' is defined but never used                               @typescript-eslint/no-unused-vars
+   3:8   error  'logger' is defined but never used                                        @typescript-eslint/no-unused-vars
+  97:33  error  'cityId' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\Ashok\Desktop\CityPulse AI\backend\src\services\analytics\ReportExportService.ts
+  1:10  error  'Types' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Ashok\Desktop\CityPulse AI\backend\src\services\analytics\ServiceComparisonEngine.ts
+  1:10  error  'Types' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Ashok\Desktop\CityPulse AI\backend\src\services\emergency\EmergencyService.ts
+  225:15  error  'newStateIndex' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Ashok\Desktop\CityPulse AI\backend\src\services\ev\EVSessionService.ts
+  1:42  error  'EVChargingStation' is defined but never used  @typescript-eslint/no-unused-vars
+  6:8   error  'mongoose' is defined but never used           @typescript-eslint/no-unused-vars
+
+C:\Users\Ashok\Desktop\CityPulse AI\backend\src\services\ev\EVStationService.ts
+  5:8  error  'mongoose' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Ashok\Desktop\CityPulse AI\backend\src\services\garbage\GarbageRouteService.ts
+  7:8  error  'mongoose' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Ashok\Desktop\CityPulse AI\backend\src\services\garbage\GarbageVehicleService.ts
+  4:25  error  'DriverStatus' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Ashok\Desktop\CityPulse AI\backend\src\services\garbage\RouteProgressService.ts
+  51:15  error  'radiusKm' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Ashok\Desktop\CityPulse AI\backend\src\services\intelligence\anomaly\CitizenReportIntelligenceEngine.ts
+   3:8   error  'mongoose' is defined but never used            @typescript-eslint/no-unused-vars
+  73:41  error  Require statement not part of import statement  @typescript-eslint/no-var-requires
+
+C:\Users\Ashok\Desktop\CityPulse AI\backend\src\services\intelligence\anomaly\GarbageIntelligenceEngine.ts
+   2:8   error  'mongoose' is defined but never used            @typescript-eslint/no-unused-vars
+  43:41  error  Require statement not part of import statement  @typescript-eslint/no-var-requires
+
+C:\Users\Ashok\Desktop\CityPulse AI\backend\src\services\intelligence\correlation\CorrelationEngine.ts
+   4:8   error  'mongoose' is defined but never used                 @typescript-eslint/no-unused-vars
+  15:15  error  'targetLocation' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Ashok\Desktop\CityPulse AI\backend\src\services\intelligence\pipeline\TelemetryIntelligencePipeline.ts
+  33:61  error  Require statement not part of import statement  @typescript-eslint/no-var-requires
+  42:55  error  Require statement not part of import statement  @typescript-eslint/no-var-requires
+  52:47  error  Require statement not part of import statement  @typescript-eslint/no-var-requires
+  53:47  error  Require statement not part of import statement  @typescript-eslint/no-var-requires
+  54:46  error  Require statement not part of import statement  @typescript-eslint/no-var-requires
+  55:50  error  Require statement not part of import statement  @typescript-eslint/no-var-requires
+
+C:\Users\Ashok\Desktop\CityPulse AI\backend\src\services\intelligence\prediction\PredictionEngine.ts
+  2:8  error  'mongoose' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Ashok\Desktop\CityPulse AI\backend\src\services\intelligence\recommendation\RecommendationEngine.ts
+  2:8  error  'mongoose' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Ashok\Desktop\CityPulse AI\backend\src\services\intelligence\risk\RiskScoringEngine.ts
+  1:10  error  'IntelligenceEvent' is defined but never used  @typescript-eslint/no-unused-vars
+  3:8   error  'mongoose' is defined but never used           @typescript-eslint/no-unused-vars
+
+C:\Users\Ashok\Desktop\CityPulse AI\backend\src\services\notification\NotificationService.ts
+   5:17  error  'emitToCityRoom' is defined but never used    @typescript-eslint/no-unused-vars
+  85:17  error  Unexpected lexical declaration in case block  no-case-declarations
+  97:17  error  Unexpected lexical declaration in case block  no-case-declarations
+
+C:\Users\Ashok\Desktop\CityPulse AI\backend\src\services\streetlight\StreetlightAssetService.ts
+  1:28  error  'StreetlightController' is defined but never used   @typescript-eslint/no-unused-vars
+  1:51  error  'StreetlightSensor' is defined but never used       @typescript-eslint/no-unused-vars
+  1:70  error  'StreetlightIncident' is defined but never used     @typescript-eslint/no-unused-vars
+  1:91  error  'StreetlightMaintenance' is defined but never used  @typescript-eslint/no-unused-vars
+
+Ô£û 52 problems (52 errors, 0 warnings)
+  1 error and 0 warnings potentially fixable with the `--fix` option.
+

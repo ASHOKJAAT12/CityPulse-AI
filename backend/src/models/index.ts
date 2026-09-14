@@ -87,3 +87,23 @@ export * from './EmergencyCorrelation';
 export * from './DigitalTwinNode';
 export * from './DigitalTwinRelationship';
 export * from './DigitalTwinSnapshot';
+
+// Phase 18 - Predictive Maintenance & AI Evaluation
+export * from './PredictiveMaintenanceRisk';
+export * from './AIModelRegistry';
+export * from './AIModelEvaluation';
+export * from './AIModelFeedback';
+
+// Phase 19 - IoT Device Management & Telemetry Ingestion
+export * from './IoTDevice';
+export * from './IoTGateway';
+export * from './IoTDeviceCredential';
+export * from './IoTDeviceBinding';
+export * from './IoTHeartbeat';
+export * from './IoTTelemetryEvent';
+export * from './IoTDeviceIncident';
+
+// Phase 20: Optimization & Planning
+export * from './OptimizationRecommendation';
+export * from './OptimizationScenario';
+export * from './MaintenancePlan';

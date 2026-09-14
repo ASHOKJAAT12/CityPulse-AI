@@ -78,7 +78,7 @@ export class NotificationService {
                 }
                 break;
 
-            case NotificationAudience.CITY:
+            case NotificationAudience.CITY: {
                 // All citizens + admins mapping to this city.
                 // To avoid unbounded memory in very large cities, one would typically use streams.
                 // For Phase 12, we fetch _ids only.
@@ -91,8 +91,9 @@ export class NotificationService {
                 }, '_id').lean();
                 targets = cityUsers.map(u => u._id);
                 break;
+            }
 
-            case NotificationAudience.ROLE:
+            case NotificationAudience.ROLE: {
                 if (!payload.role) break;
                 const roleUsers = await User.find({
                     $or: [
@@ -104,6 +105,7 @@ export class NotificationService {
                 }, '_id').lean();
                 targets = roleUsers.map(u => u._id);
                 break;
+            }
 
             case NotificationAudience.DEPARTMENT:
                 // Extending for dept logic if required (mostly admins tied to dept)

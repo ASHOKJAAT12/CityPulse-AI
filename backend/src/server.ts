@@ -7,8 +7,9 @@ import { env } from './config/env';
 import { connectDatabase, disconnectDatabase } from './config/database';
 import { initializeWebSocket } from './websocket';
 import logger from './utils/logger';
-import { TelemetryIntelligencePipeline } from './services/intelligence/pipeline/TelemetryIntelligencePipeline';
 import { DigitalTwinSyncService } from './services/digitalTwin/SyncService';
+import { TelemetryIntelligencePipeline } from './services/intelligence/pipeline/TelemetryIntelligencePipeline';
+import { IoTHealthMonitor } from './services/iot/IoTHealthMonitor';
 
 const PORT = env.PORT;
 
@@ -30,6 +31,9 @@ async function startServer(): Promise<void> {
 
     // ── 4.6 Initialize Digital Twin Symbiosis ────────────────────
     DigitalTwinSyncService.init();
+
+    // ── 4.7 Initialize Phase 19 IoT Health Engine ───────────────
+    IoTHealthMonitor.start();
 
     // ── 5. Start listening ──────────────────────────────────────
     server.listen(PORT, () => {

@@ -21,7 +21,7 @@ export const getNodes = async (req: Request, res: Response) => {
     try {
         const cityId = getCityId(req);
 
-        let filter: any = { cityId: new Types.ObjectId(cityId), visible: true };
+        const filter: any = { cityId: new Types.ObjectId(cityId), visible: true };
         if (req.query.domain) filter.domain = req.query.domain;
         if (req.query.status) filter.status = req.query.status;
 

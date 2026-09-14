@@ -106,4 +106,4 @@ async function runSimulator() {
     }
 }
 
-runSimulator();
+runSimulator().catch(console.error);
