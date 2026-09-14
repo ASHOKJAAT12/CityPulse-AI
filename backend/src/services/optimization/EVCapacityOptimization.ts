@@ -4,43 +4,53 @@ import { CapacityEngine } from './CapacityEngine';
 export class EVCapacityOptimization {
 
     static async generateStationLoadBalancing(cityId: string, userId: string) {
-        // Find overloaded stations (> 85% capacity)
         const cap = await CapacityEngine.getCityCapacityBaselines(cityId);
         const overloaded = cap.domains.ev.bottlenecks;
 
-        if (overloaded.length === 0) return null; // Optimum
+        if (overloaded.length === 0) return null;
 
-        // Pick worst bottleneck
+        // Pick worst bottleneck (highest utilization)
         const target = overloaded.sort((a, b) => b.utilization - a.utilization)[0];
 
-        // Ensure station exists
         const station = await EVChargingStation.findById(target.stationId);
         if (!station) return null;
 
-        // Find nearest underutilized station
-        const nearby = await EVChargingStation.find({
+        // BUG FIX #10: Idempotency guard — prevent spam creating duplicate recommendations
+        const existingRec = await OptimizationRecommendation.findOne({
+            cityId,
+            service: 'EV',
+            status: { $in: ['GENERATED', 'UNDER_REVIEW'] },
+            'baseline.targetStationId': station._id
+        });
+
+        if (existingRec) return existingRec;
+
+        // Find nearest underutilized station for diversion
+        // BUG FIX #11: Filter out already-overloaded stations from diversion candidates
+        const overloadedIds = new Set(overloaded.map(o => String(o.stationId)));
+        const diversions = await EVChargingStation.find({
             cityId,
             status: 'ONLINE',
             _id: { $ne: station._id }
         });
 
-        if (nearby.length === 0) return null;
-
-        // Simply pick the first one for heuristics, realistically this would use Haversine GIS sorting
-        const diversionStation = nearby[0];
+        const diversionStation = diversions.find(d => !overloadedIds.has(String(d._id)));
+        if (!diversionStation) return null; // No viable diversion target
 
         const recommendation = new OptimizationRecommendation({
             cityId,
             createdBy: userId,
             optimizationType: 'EV_CAPACITY',
             service: 'EV',
-            title: `EV Load Balancing: Divert from ${station.name}`,
-            summary: `Station ${station.name} is running at ${target.utilization}% load. Recommend issuing active dynamic routing limits steering users to ${diversionStation.name}.`,
+            title: `EV Load Balancing: Divert From ${station.name}`,
+            summary: `Station [${station.name}] is at ${target.utilization}% utilization. Recommend dynamic routing to steer users toward [${diversionStation.name}] to balance grid load.`,
             objective: 'MAXIMIZE_RESOURCE_UTILIZATION',
             baseline: {
                 targetStationId: station._id,
+                targetStationName: station.name,
                 targetUtilization: target.utilization,
-                diversionStationId: diversionStation._id
+                diversionStationId: diversionStation._id,
+                diversionStationName: diversionStation.name
             },
             recommendedPlan: {
                 action: 'DIVERT_TRAFFIC',
@@ -49,18 +59,19 @@ export class EVCapacityOptimization {
             },
             expectedImpact: {
                 utilizationReductionPercent: 20,
+                estimatedNewUtilization: Math.max(0, target.utilization - 20),
                 metric: 'UTILIZATION_BALANCED'
             },
             constraints: {
-                proximity: '4.2 km',
                 diversionCapacityAvailable: true
             },
             evidence: {
                 bottleneckThreshold: '>85%',
-                currentLoad: target.utilization
+                currentLoad: target.utilization,
+                overloadedStationsCount: overloaded.length
             },
             confidence: 90,
-            score: target.utilization // Higher utilization = higher urgency score
+            score: target.utilization
         });
 
         await recommendation.save();

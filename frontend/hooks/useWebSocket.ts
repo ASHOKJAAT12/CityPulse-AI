@@ -18,9 +18,15 @@ export function useWebSocket(options: WebSocketOptions = { autoConnect: true }) 
         // Ensure we only have one socket connection
         if (socketRef.current) return;
 
-        const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        let originUrl = 'http://localhost:5000';
+        try {
+            const tempUrl = process.env.NEXT_PUBLIC_SOCKET_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+            originUrl = new URL(tempUrl).origin;
+        } catch (e) {
+            // fallback if URL parsing fails
+        }
 
-        const socket = io(SOCKET_URL, {
+        const socket = io(originUrl, {
             auth: { token: options.token },
             withCredentials: true,
             reconnection: true,

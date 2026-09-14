@@ -13,8 +13,8 @@ export async function register(req: Request, res: Response, next: NextFunction):
         res.cookie('refreshToken', result.tokens.refreshToken, {
             httpOnly: true,
             secure: env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            path: '/api/v1/auth/citizen/refresh',
+            sameSite: 'lax',
+            path: '/',
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         });
 
@@ -33,8 +33,8 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
         res.cookie('refreshToken', result.tokens.refreshToken, {
             httpOnly: true,
             secure: env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            path: '/api/v1/auth/citizen/refresh',
+            sameSite: 'lax',
+            path: '/',
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         });
 
@@ -60,8 +60,8 @@ export async function refresh(req: Request, res: Response, next: NextFunction): 
         res.cookie('refreshToken', result.refreshToken, {
             httpOnly: true,
             secure: env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            path: '/api/v1/auth/citizen/refresh',
+            sameSite: 'lax',
+            path: '/',
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         });
 
@@ -81,10 +81,10 @@ export async function logout(req: Request, res: Response, next: NextFunction): P
             await citizenAuthService.logout(tokenToUse);
         }
 
-        res.clearCookie('refreshToken', { path: '/api/v1/auth/citizen/refresh' });
+        res.clearCookie('refreshToken', { path: '/' });
         sendSuccess(res, null, 'Logged out successfully', 200);
     } catch (e) {
-        res.clearCookie('refreshToken', { path: '/api/v1/auth/citizen/refresh' });
+        res.clearCookie('refreshToken', { path: '/' });
         sendSuccess(res, null, 'Logged out successfully', 200);
     }
 }

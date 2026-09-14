@@ -77,7 +77,15 @@ export class CitizenAuthService {
                 email: newUser.email,
                 mobile: newUser.phone,
                 role: newUser.role,
-                cityId: newUser.cityId?.toString()
+                cityId: newUser.cityId?.toString(),
+                city: {
+                    id: city._id.toString(),
+                    name: city.name,
+                    state: city.state,
+                    status: city.status,
+                    latitude: city.location?.coordinates?.[1],
+                    longitude: city.location?.coordinates?.[0]
+                }
             },
             tokens
         };
@@ -129,7 +137,15 @@ export class CitizenAuthService {
                 email: user.email,
                 mobile: user.phone,
                 role: user.role,
-                cityId: user.cityId ? user.cityId.toString() : null
+                cityId: user.cityId ? user.cityId.toString() : null,
+                city: {
+                    id: city._id.toString(),
+                    name: city.name,
+                    state: city.state,
+                    status: city.status,
+                    latitude: city.location?.coordinates?.[1],
+                    longitude: city.location?.coordinates?.[0]
+                }
             },
             tokens
         };

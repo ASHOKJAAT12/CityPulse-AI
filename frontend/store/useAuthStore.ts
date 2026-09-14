@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import api from '../services/api';
+import api, { setCitizenAccessToken } from '../services/api';
 
 export type UserRole = 'SUPER_ADMIN' | 'CITY_ADMIN' | 'CITIZEN';
 
@@ -35,6 +35,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     setAuth: (user, token) => set({
         user,
         accessToken: token,
+        currentCity: (user as any).city || null,
         isAuthenticated: true,
         isLoading: false
     }),
@@ -62,6 +63,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             if (data?.success && data?.data?.accessToken) {
                 // If successful, we got the new access token. Now we need user profile.
                 const token = data.data.accessToken;
+                // Update Axios interceptor memory state
+                setCitizenAccessToken(token);
                 // Temporarily set token in api instance so profile fetch works
                 api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 

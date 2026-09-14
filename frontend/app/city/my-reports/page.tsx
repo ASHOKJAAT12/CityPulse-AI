@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { api } from '@/lib/api';
+import api from '@/services/api';
 import { FileText, MapPin, AlertCircle, Clock, ChevronRight, Activity } from 'lucide-react';
 
 export default function MyReportsPage() {

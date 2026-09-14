@@ -59,6 +59,6 @@ const DigitalTwinNodeSchema = new Schema<IDigitalTwinNode>(
 DigitalTwinNodeSchema.index({ location: '2dsphere' });
 DigitalTwinNodeSchema.index({ cityId: 1, domain: 1 });
 DigitalTwinNodeSchema.index({ cityId: 1, entityId: 1 }, { unique: true }); // Prevent duplicate graph nodes per asset
-DigitalTwinNodeSchema.index({ status: 1 });
+// DigitalTwinNodeSchema.index({ status: 1 }); // Removed: duplicate of index: true in schema definition
 
 export const DigitalTwinNode = model<IDigitalTwinNode>('DigitalTwinNode', DigitalTwinNodeSchema);

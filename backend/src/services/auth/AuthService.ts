@@ -51,6 +51,24 @@ export class AuthService {
             expiresAt
         });
 
+        let city = null;
+        if (user.cityId) {
+            // Needed to cast or require appropriately if City wasn't imported.
+            // But let's check if City is imported first! Look: "import { User, RefreshToken } from '../../models';"
+            const { City } = require('../../models');
+            const cityDoc = await City.findById(user.cityId);
+            if (cityDoc) {
+                city = {
+                    id: cityDoc._id.toString(),
+                    name: cityDoc.name,
+                    state: cityDoc.state,
+                    status: cityDoc.status,
+                    latitude: cityDoc.location?.coordinates?.[1],
+                    longitude: cityDoc.location?.coordinates?.[0]
+                };
+            }
+        }
+
         return {
             user: {
                 id: user.id,
@@ -58,7 +76,8 @@ export class AuthService {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 role: user.role,
-                cityId: user.cityId ? user.cityId.toString() : null
+                cityId: user.cityId ? user.cityId.toString() : null,
+                city
             },
             tokens
         };

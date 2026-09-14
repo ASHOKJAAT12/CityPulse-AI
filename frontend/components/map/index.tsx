@@ -120,7 +120,7 @@ export function Marker({ position, label, popup, onClick }: MarkerProps) {
         <LeafletMarker
             position={[position.lat, position.lng]}
             title={label}
-            eventHandlers={{ click: onClick }}
+            eventHandlers={onClick ? { click: onClick } : undefined}
         >
             {popup && <LeafletPopup>{popup}</LeafletPopup>}
         </LeafletMarker>

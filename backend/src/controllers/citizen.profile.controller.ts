@@ -14,7 +14,14 @@ export async function getProfile(req: Request, res: Response, next: NextFunction
         if (user.cityId) {
             const cityDoc = await City.findById(user.cityId);
             if (cityDoc) {
-                city = { id: cityDoc._id.toString(), name: cityDoc.name, state: cityDoc.state, status: cityDoc.status };
+                city = {
+                    id: cityDoc._id.toString(),
+                    name: cityDoc.name,
+                    state: cityDoc.state,
+                    status: cityDoc.status,
+                    latitude: cityDoc.location?.coordinates?.[1],
+                    longitude: cityDoc.location?.coordinates?.[0]
+                };
             }
         }
 

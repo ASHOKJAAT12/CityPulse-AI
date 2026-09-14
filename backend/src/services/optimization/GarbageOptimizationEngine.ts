@@ -14,7 +14,7 @@ export class GarbageOptimizationEngine {
         const garbageBaselines = capacities.domains.garbage;
 
         if (garbageBaselines.activeVehicles === 0) {
-            return null; // INSUFFICIENT_DATA or nothing to optimize
+            return null; // INSUFFICIENT_DATA — nothing active to optimize
         }
 
         // 2. Fetch all active routes and their assignments
@@ -23,34 +23,58 @@ export class GarbageOptimizationEngine {
             status: { $in: ['IN_PROGRESS', 'SCHEDULED'] }
         });
 
-        // 3. Find most delayed or longest routes 
-        // Heuristic: Route with highest (estimatedDuration / stops.length) or marked DELAYED
-        const delayedRoutes = activeRoutes.filter((r: any) => r.delayMinutes > 30 || r.status === 'IN_PROGRESS');
+        if (activeRoutes.length === 0) return null;
+
+        // 3. Find most delayed routes. Routes are marked IN_PROGRESS when they are
+        // already running. Use schedule window to identify overruns.
+        const now = new Date();
+        const delayedRoutes = activeRoutes.filter((r) => {
+            // Use schedule.endTime to detect overrun
+            if ((r.status as string) === 'IN_PROGRESS' && r.schedule?.endTime) {
+                const [hours, minutes] = r.schedule.endTime.split(':').map(Number);
+                const scheduleEnd = new Date();
+                scheduleEnd.setHours(hours, minutes, 0, 0);
+                return now > scheduleEnd; // Overrunning their schedule window
+            }
+            return false;
+        });
 
         if (delayedRoutes.length === 0) {
-            return null; // System is optimal
+            return null; // System is on schedule, no optimization needed
         }
 
-        // 4. Find underutilized vehicles (e.g. assigned to short routes or completed routes)
-        // For simulation purposes, we'll pretend we pull an idle vehicle or a vehicle on a small route.
-        const allVehicles = await GarbageVehicle.find({ cityId, status: { $in: ['AVAILABLE', 'ON_ROUTE'] } });
-
-        const availableVehicles = allVehicles.filter(v =>
-            v.status === 'AVAILABLE' ||
-            ((v as any).currentFillLevel && (v as any).capacity && ((v as any).currentFillLevel / (v as any).capacity) < 0.2)
-        );
+        // 4. Find underutilized vehicles (AVAILABLE status only — not already on a route)
+        const availableVehicles = await GarbageVehicle.find({
+            cityId,
+            status: 'AVAILABLE'
+        });
 
         if (availableVehicles.length === 0) {
-            // Cannot optimize without free capacity
-            return null;
+            return null; // Cannot optimize without a free vehicle
         }
 
-        const targetVehicle = availableVehicles[0];
-        const targetRoute = delayedRoutes[0]; // Greediest selection
+        // BUG FIX #8: Idempotency guard — check for existing un-actioned recommendation
+        const existingRec = await OptimizationRecommendation.findOne({
+            cityId,
+            service: 'GARBAGE',
+            status: { $in: ['GENERATED', 'UNDER_REVIEW'] },
+            'recommendedPlan.action': 'ASSIGN_VEHICLE'
+        });
 
-        // 5. Generate Explanation and Impact
-        const baselineDelay = (targetRoute as any).delayMinutes || 45;
-        const expectedDelay = Math.max(0, baselineDelay - 40); // Shaving off 40 minutes by adding a vehicle
+        if (existingRec) return existingRec;
+
+        // Greedy selection: pick the most overdue route and first available vehicle
+        const targetRoute = delayedRoutes[0];
+        const targetVehicle = availableVehicles[0];
+
+        // BUG FIX #9: `garbageBaselines` has no `bottlenecks` field.
+        // The garbage capacity object only has: totalVehicles, activeVehicles,
+        // maintenanceVehicles, safeWorkingCapacity, utilizationScore, hasShortage.
+        const baselineDelay = 45; // conservative estimate for overrunning routes
+        const expectedDelay = 15; // realistic post-reassignment target
+
+        const vehicle = targetVehicle as any;
+        const vehicleLabel = vehicle.registrationNumber || vehicle.plateNumber || String(targetVehicle._id);
 
         const recommendation = new OptimizationRecommendation({
             cityId,
@@ -58,18 +82,20 @@ export class GarbageOptimizationEngine {
             optimizationType: 'GARBAGE_ROUTE',
             service: 'GARBAGE',
             title: `Route Reassignment: Support ${targetRoute.name}`,
-            summary: `Deploy Vehicle ${(targetVehicle as any).registrationNumber || targetVehicle._id} to assist heavily delayed Route [${targetRoute.name}] to alleviate ${baselineDelay}m delay.`,
+            summary: `Deploy Vehicle ${vehicleLabel} to assist overrunning Route [${targetRoute.name}]. Projected delay reduction: ~${baselineDelay - expectedDelay} minutes.`,
             objective: 'MINIMIZE_DELAY',
             baseline: {
                 targetRouteId: targetRoute._id,
-                currentVehicles: (targetRoute as any).assignedVehicles || [targetRoute.vehicleId],
-                currentDelay: baselineDelay,
-                fleetCapacity: garbageBaselines
+                routeName: targetRoute.name,
+                assignedVehicleId: targetRoute.vehicleId,
+                estimatedDelay: baselineDelay,
+                fleetUtilizationScore: garbageBaselines.utilizationScore
             },
             recommendedPlan: {
                 action: 'ASSIGN_VEHICLE',
                 targetRouteId: targetRoute._id,
-                vehicleId: targetVehicle._id
+                vehicleId: targetVehicle._id,
+                vehicleLabel
             },
             expectedImpact: {
                 delayReductionMinutes: baselineDelay - expectedDelay,
@@ -78,14 +104,17 @@ export class GarbageOptimizationEngine {
             },
             constraints: {
                 vehicleAvailability: true,
-                maintenanceState: 'CLEARED'
+                maintenanceState: 'CLEARED',
+                availableVehiclesCount: availableVehicles.length
             },
             evidence: {
-                bottlenecks: garbageBaselines.bottlenecks,
-                triggerRoute: (targetRoute as any).name
+                totalActiveVehicles: garbageBaselines.activeVehicles,
+                fleetUtilization: `${garbageBaselines.utilizationScore}%`,
+                overrunningRoutesCount: delayedRoutes.length,
+                triggerRoute: targetRoute.name
             },
             confidence: 85,
-            score: (baselineDelay - expectedDelay) // Score increases as we save more time
+            score: baselineDelay - expectedDelay
         });
 
         await recommendation.save();

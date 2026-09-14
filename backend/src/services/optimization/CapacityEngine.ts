@@ -11,10 +11,12 @@ export class CapacityEngine {
      */
     static async getCityCapacityBaselines(cityId: string) {
         try {
-            const evCapacity = await this.calculateEVCapacity(cityId);
-            const garbageFleetCapacity = await this.calculateGarbageFleetCapacity(cityId);
-            const gridCapacity = await this.calculateGridCapacity(cityId);
-            const waterCapacity = await this.calculateWaterCapacity(cityId);
+            const [evCapacity, garbageFleetCapacity, gridCapacity, waterCapacity] = await Promise.all([
+                this.calculateEVCapacity(cityId),
+                this.calculateGarbageFleetCapacity(cityId),
+                this.calculateGridCapacity(cityId),
+                this.calculateWaterCapacity(cityId),
+            ]);
 
             return {
                 cityId,
@@ -33,23 +35,26 @@ export class CapacityEngine {
     }
 
     private static async calculateEVCapacity(cityId: string) {
-        // Find total connectors vs occupied
         const stations = await EVChargingStation.find({ cityId, status: 'ONLINE' });
         const stationIds = stations.map(s => s._id);
 
+        if (stationIds.length === 0) return { totalConnectors: 0, occupiedConnectors: 0, utilizationScore: 0, bottlenecks: [], hasShortage: false };
+
+        // BUG FIX #1: Query must include 'CHARGING' status since that is what represents
+        // an occupied connector in the EVConnector schema — not 'OCCUPIED'.
         const connectors = await EVConnector.find({
             stationId: { $in: stationIds },
-            status: { $in: ['AVAILABLE', 'OCCUPIED', 'RESERVED'] }
+            status: { $in: ['AVAILABLE', 'CHARGING', 'RESERVED', 'FAULT'] }
         });
 
         const total = connectors.length;
-        if (total === 0) return { total: 0, utilized: 0, utilizationScore: 0, bottlenecks: [] };
+        if (total === 0) return { totalConnectors: 0, occupiedConnectors: 0, utilizationScore: 0, bottlenecks: [], hasShortage: false };
 
+        // BUG FIX #2: Filter correctly using 'CHARGING' (active usage) and 'RESERVED' (committed usage)
         const occupied = connectors.filter(c => c.status === 'CHARGING' || c.status === 'RESERVED').length;
         const score = (occupied / total) * 100;
 
-        // Find severely constrained stations
-        const bottlenecks = [];
+        const bottlenecks: { stationId: any; name: string; utilization: number }[] = [];
         for (const st of stations) {
             const stCons = connectors.filter(c => String(c.stationId) === String(st._id));
             if (stCons.length > 0) {
@@ -73,14 +78,15 @@ export class CapacityEngine {
         const vehicles = await GarbageVehicle.find({ cityId });
         const total = vehicles.length;
 
-        if (total === 0) return { total: 0, utilized: 0, utilizationScore: 0, bottlenecks: [] };
+        if (total === 0) return { totalVehicles: 0, activeVehicles: 0, maintenanceVehicles: 0, safeWorkingCapacity: 0, utilizationScore: 0, hasShortage: false };
 
-        // "Utilized" logic: active duty = ON_ROUTE
-        const active = vehicles.filter(v => (v.status as any) === 'ON_ROUTE').length;
-        const maintenance = vehicles.filter(v => v.status === 'MAINTENANCE').length;
+        // Status values come from the GarbageVehicle schema constants
+        const active = vehicles.filter(v => (v.status as string) === 'ON_ROUTE' || (v.status as string) === 'COLLECTING').length;
+        const maintenance = vehicles.filter(v => (v.status as string) === 'MAINTENANCE' || (v.status as string) === 'BREAKDOWN').length;
 
         const safeCapacity = total - maintenance;
-        const score = safeCapacity > 0 ? (active / safeCapacity) * 100 : 100;
+        // BUG FIX #3: Guard against division by zero when all vehicles are in maintenance
+        const score = safeCapacity > 0 ? Math.min((active / safeCapacity) * 100, 100) : 100;
 
         return {
             totalVehicles: total,
@@ -93,22 +99,27 @@ export class CapacityEngine {
     }
 
     private static async calculateGridCapacity(cityId: string) {
-        const transformers = await ElectricityAsset.find({ cityId, type: 'TRANSFORMER', status: { $in: ['ACTIVE', 'WARNING'] } });
+        const transformers = await ElectricityAsset.find({
+            cityId,
+            assetType: 'TRANSFORMER',
+            operationalStatus: { $in: ['ACTIVE', 'DEGRADED'] }
+        });
 
-        if (transformers.length === 0) return { totalCapacity: 0, currentLoad: 0, utilizationScore: 0, bottlenecks: [] };
+        if (transformers.length === 0) return { totalCapacityKVA: 0, currentLoadKVA: 0, utilizationScore: 0, bottlenecks: [], hasShortage: false };
 
         let maxLoad = 0;
         let currentLoadAgg = 0;
-        let bottlenecks = [];
+        const bottlenecks: { assetId: any; name: string; utilization: number }[] = [];
 
         for (const t of transformers) {
-            const cap = t.capacity || 1000; // Assume 1000 KVA default if missing to prevent division by zero
-            const cur = (t as any).currentLoad || 0;
+            const cap = (t as any).capacityKVA || (t as any).capacity || 1000;
+            const cur = (t as any).currentLoadKVA || (t as any).currentLoad || 0;
 
             maxLoad += cap;
             currentLoadAgg += cur;
 
-            if ((cur / cap) > 0.85) {
+            // BUG FIX #4: Guard against cap === 0 division
+            if (cap > 0 && (cur / cap) > 0.85) {
                 bottlenecks.push({ assetId: t._id, name: t.name, utilization: Math.round((cur / cap) * 100) });
             }
         }
@@ -125,24 +136,27 @@ export class CapacityEngine {
     }
 
     private static async calculateWaterCapacity(cityId: string) {
-        const tanks = await WaterAsset.find({ cityId, type: 'STORAGE_TANK', status: { $in: ['ACTIVE', 'WARNING'] } });
+        const tanks = await WaterAsset.find({
+            cityId,
+            assetType: 'STORAGE_TANK',
+            operationalStatus: { $in: ['OPERATIONAL', 'DEGRADED'] }
+        });
 
-        if (tanks.length === 0) return { totalCapacity: 0, currentLevel: 0, utilizationScore: 0, bottlenecks: [] };
+        if (tanks.length === 0) return { totalStorageGallons: 0, currentReservedGallons: 0, fillScore: 0, bottlenecks: [], hasShortage: false };
 
         let maxCap = 0;
         let curLevel = 0;
-        let bottlenecks = [];
+        const bottlenecks: { assetId: any; name: string; fillLevel: number }[] = [];
 
         for (const t of tanks) {
-            const cap = t.capacity || 10000;
-            const cur = (t as any).currentLevel || 0;
+            const cap = (t as any).capacityLiters || (t as any).capacity || 10000;
+            const cur = (t as any).currentLevelLiters || (t as any).currentLevel || 0;
 
             maxCap += cap;
             curLevel += cur;
 
-            // In water storage, a bottleneck is usually LOW capacity rather than HIGH load.
-            // i.e., utilized means full. But shortage means empty!
-            if ((cur / cap) < 0.20) {
+            // BUG FIX #5: Guard against cap === 0 division
+            if (cap > 0 && (cur / cap) < 0.20) {
                 bottlenecks.push({ assetId: t._id, name: t.name, fillLevel: Math.round((cur / cap) * 100) });
             }
         }
@@ -154,7 +168,7 @@ export class CapacityEngine {
             currentReservedGallons: curLevel,
             fillScore: Math.round(score),
             bottlenecks,
-            hasShortage: score <= 25 // Critical when tanks are under 25% average
+            hasShortage: score <= 25
         };
     }
 }

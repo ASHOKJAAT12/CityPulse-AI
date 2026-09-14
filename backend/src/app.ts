@@ -3,6 +3,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import compression from 'compression';
+import cookieParser from 'cookie-parser';
 import { env, isProduction } from './config/env';
 import { API_PREFIX, MAX_REQUEST_BODY_SIZE, RATE_LIMIT_MAX_REQUESTS, RATE_LIMIT_WINDOW_MS } from './constants/app';
 import { requestLogger } from './middleware/requestLogger';
@@ -48,8 +49,8 @@ export function createApp(): Application {
             },
             credentials: true,
             methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-            allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id'],
-            exposedHeaders: ['X-Request-Id'],
+            allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id', 'X-Client-Request-Id', 'x-client-request-id'],
+            exposedHeaders: ['X-Request-Id', 'X-Client-Request-Id', 'x-client-request-id'],
         })
     );
 
@@ -67,6 +68,9 @@ export function createApp(): Application {
 
     // ── Compression ───────────────────────────────────────────────
     app.use(compression());
+
+    // ── Cookie parsing ────────────────────────────────────────────
+    app.use(cookieParser());
 
     // ── Body parsing ──────────────────────────────────────────────
     app.use(express.json({ limit: MAX_REQUEST_BODY_SIZE }));

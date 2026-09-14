@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { api } from '@/lib/api';
+import api from '@/services/api';
 import toast from 'react-hot-toast';
 import { Camera, MapPin, CheckCircle, AlertTriangle } from 'lucide-react';
 
@@ -128,15 +128,15 @@ export default function SubmitReportPage() {
                         <div className="pt-4 flex gap-4">
                             <button
                                 type="button"
-                                onClick={() => router.push('/city/my-reports')}
-                                className="flex-1 px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 transition-colors"
+                                onClick={() => router.back()}
+                                className="flex-1 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg font-medium hover:bg-slate-300 transition-colors"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="submit"
                                 disabled={loading || !location}
-                                className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors flex justify-center"
+                                className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors flex justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {loading ? 'Submitting...' : 'Submit Report'}
                             </button>
@@ -160,7 +160,7 @@ export default function SubmitReportPage() {
                         </div>
                         <button
                             onClick={(e) => { e.preventDefault(); setLocation({ lat: Math.random() * 10 + 20, lng: Math.random() * 10 + 70 }); toast.success("Location identified!") }}
-                            className="px-6 py-3 bg-primary text-white rounded shadow"
+                            className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow transition-colors"
                         >
                             Auto-Pin My Location
                         </button>
