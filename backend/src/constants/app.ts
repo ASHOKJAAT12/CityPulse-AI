@@ -6,8 +6,8 @@ export const API_PREFIX = `/api/${API_VERSION}`;
 export const MAX_REQUEST_BODY_SIZE = '10mb';
 
 /** Rate limiting */
-export const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
-export const RATE_LIMIT_MAX_REQUESTS = 100;
+export const RATE_LIMIT_WINDOW_MS = 1000; // 1 second
+export const RATE_LIMIT_MAX_REQUESTS = 100000; // Effectively disabled for dev
 
 /** Bcrypt */
 export const BCRYPT_ROUNDS = 12;

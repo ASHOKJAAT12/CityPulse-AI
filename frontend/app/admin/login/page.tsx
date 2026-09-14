@@ -22,8 +22,8 @@ export default function LoginPage() {
         setError('');
 
         try {
-            await login({ email: form.email, plaintext: form.password });
-            router.push('/admin');
+            await login({ email: form.email, password: form.password });
+            window.location.href = '/admin';
         } catch (err: any) {
             setError(err.response?.data?.message || err.message || 'Login failed. Please check your credentials.');
         } finally {

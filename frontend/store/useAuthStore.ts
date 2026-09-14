@@ -54,6 +54,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     },
 
     checkSession: async () => {
+        if (get().isAuthenticated && get().accessToken) return;
+
         try {
             // Attempt to silently refresh token (relies on HttpOnly cookie)
             const { data } = await api.post('/auth/citizen/refresh');
