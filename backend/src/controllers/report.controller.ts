@@ -1,7 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import { ReportService } from '../services/reports/ReportService';
 import { DepartmentService } from '../services/reports/DepartmentService';
+import { GeminiReportIntelligence } from '../services/intelligence/GeminiReportIntelligence';
 import { IAttachment } from '../models';
+import fs from 'fs';
 
 export class ReportController {
 
@@ -21,6 +23,34 @@ export class ReportController {
 
             const report = await ReportService.createReport(cityId, citizenId, req.body, attachments);
             res.status(201).json({ success: true, data: report });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    static async analyzeImage(req: Request, res: Response, next: NextFunction) {
+        try {
+            if (!req.file) {
+                return res.status(400).json({ success: false, message: 'No image uploaded for analysis' });
+            }
+
+            const mimeType = req.file.mimetype;
+            const base64Data = fs.readFileSync(req.file.path, { encoding: 'base64' });
+
+            const aiResult = await GeminiReportIntelligence.analyzeImage(mimeType, base64Data);
+
+            // Clean up the temporary file used for analysis
+            try {
+                fs.unlinkSync(req.file.path);
+            } catch (cleanupError) {
+                console.error('Failed to clear temp analysis file', cleanupError);
+            }
+
+            if (!aiResult) {
+                return res.status(500).json({ success: false, message: 'AI limit exceeded or failed to analyze image.' });
+            }
+
+            res.status(200).json({ success: true, data: aiResult });
         } catch (error) {
             next(error);
         }

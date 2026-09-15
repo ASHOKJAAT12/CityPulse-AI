@@ -4,6 +4,7 @@ import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
+import path from 'path';
 import { env, isProduction } from './config/env';
 import { API_PREFIX, MAX_REQUEST_BODY_SIZE, RATE_LIMIT_MAX_REQUESTS, RATE_LIMIT_WINDOW_MS } from './constants/app';
 import { requestLogger } from './middleware/requestLogger';
@@ -72,12 +73,20 @@ export function createApp(): Application {
     // ── Cookie parsing ────────────────────────────────────────────
     app.use(cookieParser());
 
+    // ── Static Files ──────────────────────────────────────────────
+    app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
     // ── Body parsing ──────────────────────────────────────────────
     app.use(express.json({ limit: MAX_REQUEST_BODY_SIZE }));
     app.use(express.urlencoded({ extended: true, limit: MAX_REQUEST_BODY_SIZE }));
 
     // ── Request logging ───────────────────────────────────────────
     app.use(requestLogger);
+
+    app.use('/api/v1/auth/citizen/refresh', (req, res, next) => {
+        console.log('[DEBUG] Cookies received on /refresh:', req.cookies);
+        next();
+    });
 
     // ── API routes ────────────────────────────────────────────────
     app.use(API_PREFIX, v1Router);

@@ -5,6 +5,7 @@ import { DepartmentService } from './DepartmentService';
 import { emitToCityRoom } from '../../websocket';
 import { AppError } from '../../utils/AppError';
 import { notificationService, NotificationAudience } from '../notification/NotificationService';
+import { GeminiReportIntelligence } from '../intelligence/GeminiReportIntelligence';
 
 export class ReportService {
     static generateReportNumber() {
@@ -22,6 +23,20 @@ export class ReportService {
         data: any,
         attachments: IAttachment[]
     ) {
+        // Automatically detect category and severity with AI
+        if (!data.category || !data.severity || !data.subcategory) {
+            const aiData = await GeminiReportIntelligence.analyzeReport(data.title, data.description);
+            if (aiData) {
+                data.category = data.category || aiData.category;
+                data.subcategory = data.subcategory || aiData.subcategory;
+                data.severity = data.severity || aiData.severity;
+            } else if (!data.category || !data.subcategory) {
+                // Fallback to avoid breaking schema if AI fails and no payload provided
+                data.category = data.category || 'General';
+                data.subcategory = data.subcategory || 'Other';
+            }
+        }
+
         // Find possible duplicate before insertion limits processing overhead
         const nearbyPossibleDuplicates = await CitizenReport.find({
             cityId: new Types.ObjectId(cityId),

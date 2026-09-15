@@ -3,12 +3,13 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/services/api';
 import toast from 'react-hot-toast';
-import { Camera, MapPin, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Camera, MapPin, CheckCircle, AlertTriangle, Sparkles } from 'lucide-react';
 
 export default function SubmitReportPage() {
     const router = useRouter();
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
+    const [analyzingImage, setAnalyzingImage] = useState(false);
 
     // Form payload
     const [category, setCategory] = useState('OTHER');
@@ -57,6 +58,39 @@ export default function SubmitReportPage() {
             toast.error(error.response?.data?.message || "Failed to submit report");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleAnalyzeImage = async () => {
+        if (files.length === 0) {
+            toast.error("Please upload an image first");
+            return;
+        }
+
+        setAnalyzingImage(true);
+        try {
+            const formData = new FormData();
+            formData.append('image', files[0]);
+
+            const res = await api.post('/reports/city/analyze-image', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+
+            if (res.data && res.data.data) {
+                const aiData = res.data.data;
+                setTitle(aiData.title);
+                setDescription(aiData.description);
+                // Try to match uppercase category precisely, otherwise fallback
+                const aiCatNormalized = aiData.category.toUpperCase().replace(/\s/g, '_');
+                if (categories.includes(aiCatNormalized)) {
+                    setCategory(aiCatNormalized);
+                }
+                toast.success("AI auto-filled the form!");
+            }
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || "Failed to analyze image");
+        } finally {
+            setAnalyzingImage(false);
         }
     };
 
@@ -123,6 +157,17 @@ export default function SubmitReportPage() {
                                     </p>
                                 </div>
                             </div>
+                            {files.length > 0 && (
+                                <button
+                                    type="button"
+                                    onClick={handleAnalyzeImage}
+                                    disabled={analyzingImage}
+                                    className="mt-2 w-full py-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-md font-medium shadow flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-50"
+                                >
+                                    <Sparkles className="w-4 h-4" />
+                                    {analyzingImage ? "Analyzing Image..." : "Auto-Fill with AI ✨"}
+                                </button>
+                            )}
                         </div>
 
                         <div className="pt-4 flex gap-4">

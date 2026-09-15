@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { api } from '@/lib/api';
+import api from '@/services/api';
 import { ArrowLeft, Activity, Users, Settings, MessageSquare, MapPin, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Image from 'next/image';
@@ -128,7 +128,7 @@ export default function ReportDetailPage() {
                         )}
 
                         <div className="p-6 bg-muted/5 flex items-center gap-4 text-sm border-t">
-                            <MapPin className="text-primary w-5 h-5 flex-shrink-0" />
+                            <MapPin className="text-indigo-600 w-5 h-5 flex-shrink-0" />
                             <div>
                                 <span className="font-medium block">Geospatial Marker Pinged</span>
                                 <span className="text-muted-foreground">Coordinates: [{report.location.coordinates[1].toFixed(5)}, {report.location.coordinates[0].toFixed(5)}]</span>
@@ -139,7 +139,7 @@ export default function ReportDetailPage() {
                     {/* Comments Section */}
                     <div className="bg-card shadow-sm border rounded-xl overflow-hidden flex flex-col">
                         <div className="p-4 border-b bg-muted/10 font-semibold flex items-center gap-2">
-                            <MessageSquare className="w-5 h-5 text-primary" />
+                            <MessageSquare className="w-5 h-5 text-indigo-600" />
                             Correspondence Log
                         </div>
 
@@ -148,7 +148,7 @@ export default function ReportDetailPage() {
                                 <div className="text-sm text-center text-muted-foreground py-8">No comments yet. Administrative updates will appear here.</div>
                             ) : (
                                 comments.map((c: any) => (
-                                    <div key={c._id} className={`flex flex-col max-w-[85%] rounded-lg p-3 ${c.authorRole === 'CITIZEN' ? 'bg-primary text-primary-foreground self-end rounded-tr-none' : 'bg-background border shadow-sm self-start rounded-tl-none'}`}>
+                                    <div key={c._id} className={`flex flex-col max-w-[85%] rounded-lg p-3 ${c.authorRole === 'CITIZEN' ? 'bg-indigo-600 text-white self-end rounded-tr-none' : 'bg-background border shadow-sm self-start rounded-tl-none'}`}>
                                         <div className="text-xs opacity-70 mb-1 flex items-center gap-1.5">
                                             {c.authorRole !== 'CITIZEN' && <Settings className="w-3.5 h-3.5" />}
                                             {c.authorRole === 'CITIZEN' ? 'You' : 'City Administrator'} • {new Date(c.createdAt).toLocaleTimeString()}
@@ -173,7 +173,7 @@ export default function ReportDetailPage() {
                                     <button
                                         type="submit"
                                         disabled={!commentText.trim()}
-                                        className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium disabled:opacity-50 transition-colors"
+                                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-sm font-medium disabled:opacity-50 transition-colors"
                                     >
                                         Post Reply
                                     </button>
@@ -187,16 +187,16 @@ export default function ReportDetailPage() {
                 <div className="space-y-6">
                     <div className="bg-card shadow-sm border rounded-xl overflow-hidden p-6 sticky top-24">
                         <h3 className="font-semibold flex items-center gap-2 mb-6">
-                            <Activity className="w-5 h-5 text-primary" /> Resolution Journey
+                            <Activity className="w-5 h-5 text-indigo-600" /> Resolution Journey
                         </h3>
 
-                        <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-muted-foreground/20 before:to-transparent">
+                        <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-muted-foreground/20 before:to-transparent">
                             {timeline.map((event: any, idx: number) => (
-                                <div key={idx} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                                    <div className="flex items-center justify-center w-6 h-6 rounded-full border-2 border-background bg-primary text-primary-foreground shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow absolute left-2 md:left-1/2 z-10">
+                                <div key={idx} className="relative flex items-center justify-between group is-active">
+                                    <div className="flex items-center justify-center w-6 h-6 rounded-full border-2 border-background bg-primary text-primary-foreground shrink-0 shadow absolute left-2 z-10">
                                         <div className="w-2 h-2 rounded-full bg-white"></div>
                                     </div>
-                                    <div className="w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] ml-10 md:ml-0 p-3 rounded-lg border bg-background shadow-sm hover:border-primary/50 transition-colors">
+                                    <div className="w-[calc(100%-3rem)] ml-14 p-3 rounded-lg border bg-background shadow-sm hover:border-primary/50 transition-colors">
                                         <div className="text-xs font-semibold text-primary mb-1 uppercase tracking-wider">{event.status.replace('_', ' ')}</div>
                                         <div className="text-sm text-foreground mb-2 leading-relaxed">{event.message}</div>
                                         <div className="text-[10px] items-center gap-1 flex text-muted-foreground font-medium">

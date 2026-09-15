@@ -2,8 +2,13 @@ import { Router } from 'express';
 import { ReportController } from '../../controllers/report.controller';
 import { authenticate, requireRole, requireCityAccess } from '../../middleware/auth';
 import { uploadAttachment } from '../../middleware/upload';
-import { validate } from '../../middleware/validate';
-import { createReportSchema, updateReportAdminSchema, addCommentSchema, reportQuerySchema } from '../../validators/report.validator';
+import { validate, validateAll } from '../../middleware/validate';
+import {
+    createReportSchema,
+    updateReportAdminParamsSchema, updateReportAdminBodySchema,
+    addCommentParamsSchema, addCommentBodySchema,
+    reportQuerySchema
+} from '../../validators/report.validator';
 import { Role } from '../../constants/roles';
 
 const router = Router();
@@ -24,13 +29,23 @@ router.post(
     ReportController.submitReport
 );
 
+// Analyze image for auto-fill
+router.post(
+    '/city/analyze-image',
+    authenticate,
+    requireRole(Role.CITIZEN),
+    requireCityAccess((req) => (req as any).user.cityId),
+    uploadAttachment.single('image'),
+    ReportController.analyzeImage
+);
+
 // Get my reports (history)
 router.get(
     '/city/my',
     authenticate,
     requireRole(Role.CITIZEN),
     requireCityAccess((req) => (req as any).user.cityId),
-    validate(reportQuerySchema),
+    validate(reportQuerySchema, 'query'),
     ReportController.getMyReports
 );
 
@@ -49,7 +64,7 @@ router.post(
     authenticate,
     requireRole(Role.CITIZEN),
     requireCityAccess((req) => (req as any).user.cityId),
-    validate(addCommentSchema),
+    validateAll({ params: addCommentParamsSchema, body: addCommentBodySchema }),
     ReportController.addComment
 );
 
@@ -64,7 +79,7 @@ router.get(
     requireRole(Role.CITY_ADMIN, Role.SUPER_ADMIN),
     // SUPER_ADMIN passes automatically, CITY_ADMIN enforces extraction
     requireCityAccess((req) => req.query.cityId as string || (req as any).user.cityId),
-    validate(reportQuerySchema),
+    validate(reportQuerySchema, 'query'),
     ReportController.getAdminReports
 );
 
@@ -81,7 +96,7 @@ router.patch(
     '/admin/:id',
     authenticate,
     requireRole(Role.CITY_ADMIN, Role.SUPER_ADMIN),
-    validate(updateReportAdminSchema),
+    validateAll({ params: updateReportAdminParamsSchema, body: updateReportAdminBodySchema }),
     ReportController.updateReportAdmin
 );
 
@@ -90,7 +105,7 @@ router.post(
     '/admin/:id/comments',
     authenticate,
     requireRole(Role.CITY_ADMIN, Role.SUPER_ADMIN),
-    validate(addCommentSchema),
+    validateAll({ params: addCommentParamsSchema, body: addCommentBodySchema }),
     ReportController.addComment
 );
 

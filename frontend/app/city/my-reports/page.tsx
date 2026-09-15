@@ -46,7 +46,7 @@ export default function MyReportsPage() {
                 </div>
                 <button
                     onClick={() => router.push('/city/report')}
-                    className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 flex items-center gap-2"
+                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 flex items-center gap-2"
                 >
                     <AlertCircle className="w-4 h-4" />
                     New Report
@@ -83,7 +83,7 @@ export default function MyReportsPage() {
                                         {report.status.replace('_', ' ')}
                                     </span>
                                 </div>
-                                <h3 className="font-semibold text-lg line-clamp-1 mb-1 group-hover:text-primary transition-colors">{report.title}</h3>
+                                <h3 className="font-semibold text-lg line-clamp-1 mb-1 group-hover:text-indigo-600 transition-colors">{report.title}</h3>
                                 <p className="text-sm text-muted-foreground line-clamp-2">{report.description}</p>
                             </div>
 
@@ -97,7 +97,7 @@ export default function MyReportsPage() {
                                         <Clock className="w-3.5 h-3.5" />
                                         {new Date(report.createdAt).toLocaleDateString()}
                                     </div>
-                                    <div className="flex items-center text-xs font-medium text-primary group-hover:underline">
+                                    <div className="flex items-center text-xs font-medium text-indigo-600 group-hover:underline">
                                         View Track <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
                                     </div>
                                 </div>

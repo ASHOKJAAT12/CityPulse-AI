@@ -53,7 +53,9 @@ api.interceptors.request.use(
 
         const isCitizenCall =
             config.url?.startsWith('/citizen') ||
-            config.url?.includes('auth/citizen');
+            config.url?.includes('auth/citizen') ||
+            config.url?.includes('/reports/city') ||
+            !config.url?.includes('/admin');
 
         if (isCitizenCall) {
             if (citizenAccessToken && config.headers) {
@@ -88,16 +90,22 @@ api.interceptors.response.use(
 
             // Check context - is it an Admin call or Citizen call?
             const isCitizenCall =
-                originalRequest.url?.startsWith('/citizen');
+                originalRequest.url?.startsWith('/citizen') ||
+                originalRequest.url?.includes('/reports/city') ||
+                !originalRequest.url?.includes('/admin');
 
             if (isCitizenCall) {
-                // Citizen Flow: Refresh token is in HttpOnly cookie, we just call the API
+                // Citizen Flow: Refresh token is in HttpOnly cookie, but fallback is supported
                 try {
-                    const { data } = await axios.post(`${api.defaults.baseURL}/auth/citizen/refresh`, {}, {
+                    const fallbackToken = typeof window !== 'undefined' ? localStorage.getItem('citizenRefreshToken') : null;
+                    const { data } = await axios.post(`${api.defaults.baseURL}/auth/citizen/refresh`, { refreshToken: fallbackToken }, {
                         withCredentials: true
                     });
 
                     if (data.success && data.data?.accessToken) {
+                        if (data.data.refreshToken && typeof window !== 'undefined') {
+                            localStorage.setItem('citizenRefreshToken', data.data.refreshToken);
+                        }
                         setCitizenAccessToken(data.data.accessToken);
                         // Zustand store updating relies on its own logic or we inject it similarly
                         // Update original header
@@ -106,10 +114,7 @@ api.interceptors.response.use(
                     }
                 } catch (err) {
                     setCitizenAccessToken(null);
-                    if (typeof window !== 'undefined') {
-                        // Let React components handle redirection via Zustand loading state or here:
-                        window.location.href = '/login';
-                    }
+                    // Let React components handle redirection naturally via Zustand state
                     return Promise.reject(err);
                 }
             } else {

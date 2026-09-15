@@ -28,7 +28,10 @@ export default function LoginPage() {
             setLoading(true);
             const res = await api.post('/auth/citizen/login', formData);
             if (res.data.success) {
-                const { user, accessToken } = res.data.data;
+                const { user, accessToken, refreshToken } = res.data.data;
+                if (typeof window !== 'undefined' && refreshToken) {
+                    localStorage.setItem('citizenRefreshToken', refreshToken);
+                }
                 setCitizenAccessToken(accessToken);
                 setAuth(user, accessToken);
                 router.push('/app');
