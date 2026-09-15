@@ -204,7 +204,23 @@ export default function SubmitReportPage() {
                             <CheckCircle className="w-4 h-4" /> Geolocation Activated
                         </div>
                         <button
-                            onClick={(e) => { e.preventDefault(); setLocation({ lat: Math.random() * 10 + 20, lng: Math.random() * 10 + 70 }); toast.success("Location identified!") }}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                if ('geolocation' in navigator) {
+                                    navigator.geolocation.getCurrentPosition(
+                                        (pos) => {
+                                            setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+                                            toast.success("Location identified accurately!");
+                                        },
+                                        (error) => {
+                                            toast.error("Failed to retrieve location. Please check browser permissions.");
+                                        },
+                                        { enableHighAccuracy: true }
+                                    );
+                                } else {
+                                    toast.error("Geolocation is not supported by your browser");
+                                }
+                            }}
                             className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow transition-colors"
                         >
                             Auto-Pin My Location

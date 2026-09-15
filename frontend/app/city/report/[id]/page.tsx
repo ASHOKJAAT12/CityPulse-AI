@@ -12,11 +12,28 @@ export default function ReportDetailPage() {
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [commentText, setCommentText] = useState('');
+    const [address, setAddress] = useState<string>('');
 
     const fetchDetails = async () => {
         try {
             const res = await api.get(`/reports/city/${params.id}`);
-            setData(res.data.data);
+            const reportData = res.data.data;
+            setData(reportData);
+
+            if (reportData?.report?.location?.coordinates) {
+                const lng = reportData.report.location.coordinates[0];
+                const lat = reportData.report.location.coordinates[1];
+                try {
+                    // Small delay to respect Nominatim policy slightly if in tight loop, though here it's 1-off per page load
+                    const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+                    const geoData = await geoRes.json();
+                    if (geoData && geoData.display_name) {
+                        setAddress(geoData.display_name);
+                    }
+                } catch (e) {
+                    console.error("Geocoding failed", e);
+                }
+            }
         } catch (error) {
             toast.error("Failed to load report");
             router.push('/city/my-reports');
@@ -131,7 +148,8 @@ export default function ReportDetailPage() {
                             <MapPin className="text-indigo-600 w-5 h-5 flex-shrink-0" />
                             <div>
                                 <span className="font-medium block">Geospatial Marker Pinged</span>
-                                <span className="text-muted-foreground">Coordinates: [{report.location.coordinates[1].toFixed(5)}, {report.location.coordinates[0].toFixed(5)}]</span>
+                                <span className="text-muted-foreground block">Coordinates: [{report.location.coordinates[1].toFixed(5)}, {report.location.coordinates[0].toFixed(5)}]</span>
+                                {address && <span className="text-xs font-medium text-slate-700 dark:text-slate-300 mt-1 block">{address}</span>}
                             </div>
                         </div>
                     </div>

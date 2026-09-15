@@ -33,6 +33,7 @@ export function createApp(): Application {
                 ? undefined
                 : false, // Relaxed in dev for API explorer tools
             crossOriginEmbedderPolicy: false,
+            crossOriginResourcePolicy: { policy: "cross-origin" }
         })
     );
 
@@ -74,7 +75,7 @@ export function createApp(): Application {
     app.use(cookieParser());
 
     // ── Static Files ──────────────────────────────────────────────
-    app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+    app.use('/uploads', express.static(path.join(process.cwd(), 'public/uploads')));
 
     // ── Body parsing ──────────────────────────────────────────────
     app.use(express.json({ limit: MAX_REQUEST_BODY_SIZE }));
