@@ -51,11 +51,15 @@ api.interceptors.request.use(
         // Let's assume all /citizen routes and non-/admin routes belong to Citizen
         // You could also refine it based on a unified auth logic
 
+        // Explicitly identify citizen-only routes.
+        // DO NOT use !includes('/admin') as a catch-all — 
+        // city service routes (/garbage, /water, /traffic, /ev, etc.) are
+        // admin-authenticated even though they don't have /admin in the path.
         const isCitizenCall =
             config.url?.startsWith('/citizen') ||
             config.url?.includes('auth/citizen') ||
             config.url?.includes('/reports/city') ||
-            !config.url?.includes('/admin');
+            config.url?.includes('/garbage/public');
 
         if (isCitizenCall) {
             if (citizenAccessToken && config.headers) {

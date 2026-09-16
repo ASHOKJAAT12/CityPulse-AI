@@ -26,6 +26,10 @@ export default function GarbageRouteEditor() {
     const [vehicles, setVehicles] = useState<GarbageVehicle[]>([]);
     const [drivers, setDrivers] = useState<Driver[]>([]);
 
+    // Local dropdown state for immediate UI feedback
+    const [selectedVehicleId, setSelectedVehicleId] = useState<string>('');
+    const [selectedDriverId, setSelectedDriverId] = useState<string>('');
+
     // UI State
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -33,7 +37,8 @@ export default function GarbageRouteEditor() {
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
     // Map Interaction State
-    const [mapCenter, setMapCenter] = useState<LatLng | undefined>(undefined);
+    // Default to Udaipur city center; will shift to first stop once loaded
+    const UDAIPUR_CENTER: LatLng = { lat: 24.5854, lng: 73.7125 };
     const [isAddMode, setIsAddMode] = useState(false);
     const [selectedMapPoint, setSelectedMapPoint] = useState<LatLng | null>(null);
     const [newStopForm, setNewStopForm] = useState<Partial<GarbageRouteStop>>({});
@@ -53,6 +58,10 @@ export default function GarbageRouteEditor() {
             setStops(stopsRes.data || []);
             setVehicles(vehRes.data || []);
             setDrivers(driRes.data || []);
+
+            // Sync dropdown local state with saved route values
+            setSelectedVehicleId((routeRes.data?.vehicleId as GarbageVehicle)?._id || routeRes.data?.vehicleId as string || '');
+            setSelectedDriverId((routeRes.data?.driverId as Driver)?._id || routeRes.data?.driverId as string || '');
 
             // Re-center map explicitly if needed.
             // cityId is available but lat/lng requires a separate city fetch; skip for now.
@@ -134,14 +143,13 @@ export default function GarbageRouteEditor() {
             await garbageService.addStop(routeId, {
                 name: newStopForm.name,
                 sequence: newStopForm.sequence,
-                location: {
-                    type: 'Point',
-                    coordinates: [selectedMapPoint.lng, selectedMapPoint.lat],
-                },
+                // Backend validator expects flat lat/lng, NOT a nested GeoJSON object
+                latitude: selectedMapPoint.lat,
+                longitude: selectedMapPoint.lng,
                 scheduledArrival: newStopForm.scheduledArrival,
                 notes: newStopForm.notes
             } as unknown as Partial<GarbageRouteStop>);
-            showSuccess('Stop added');
+            showSuccess('Stop added ✓');
             setSelectedMapPoint(null);
             setNewStopForm({});
             loadData();
@@ -195,17 +203,99 @@ export default function GarbageRouteEditor() {
         return <div className="p-12 text-center text-red-500">Route not found</div>;
     }
 
-    // Compute map route points if GeoJSON exists. 
-    // MongoDB stores GeoJSON as [lng, lat], react-leaflet expects lat, lng
-    const routePolylinePoints: LatLng[] = route.routeGeometry?.coordinates?.map(coord => ({
-        lat: coord[1],
-        lng: coord[0]
-    })) || [];
+    // Route polyline: connect stops in sequence order.
+    // This auto-derives the visual route path from waypoints without requiring routeGeometry.
+    const sortedStops = [...stops].sort((a, b) => a.sequence - b.sequence);
+    const routePolylinePoints: LatLng[] = sortedStops.length >= 2
+        ? sortedStops.map(stop => ({ lat: stop.location.coordinates[1], lng: stop.location.coordinates[0] }))
+        : [];
+
+    // Derive map center: first stop > first route point > Udaipur default
+    const effectiveMapCenter: LatLng =
+        (stops.length > 0
+            ? { lat: stops[0].location.coordinates[1], lng: stops[0].location.coordinates[0] }
+            : null) ??
+        (routePolylinePoints.length > 0 ? routePolylinePoints[0] : null) ??
+        UDAIPUR_CENTER;
 
     const isActive = route.status === 'ACTIVE';
 
     return (
         <div className="flex flex-col h-[calc(100vh-140px)] -mt-4 fade-in">
+
+            {/* ===== STOP ADD MODAL OVERLAY ===== */}
+            {selectedMapPoint && (
+                <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    <form
+                        onSubmit={submitNewStop}
+                        className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4 border-t-4 border-emerald-500"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center mb-6">
+                            <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center mr-3">
+                                <MapPin className="w-5 h-5 text-emerald-600" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-slate-900">Add Collection Stop</h3>
+                                <p className="text-xs text-slate-500">
+                                    📍 {selectedMapPoint.lat.toFixed(5)}, {selectedMapPoint.lng.toFixed(5)}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1">Stop Name <span className="text-red-500">*</span></label>
+                                <input
+                                    type="text"
+                                    required
+                                    autoFocus
+                                    placeholder="e.g. Market Area Stop 1"
+                                    className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                    value={newStopForm.name || ''}
+                                    onChange={e => setNewStopForm({ ...newStopForm, name: e.target.value })}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1">Stop Order / Sequence <span className="text-red-500">*</span></label>
+                                <input
+                                    type="number"
+                                    required
+                                    min={1}
+                                    className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                    value={newStopForm.sequence || ''}
+                                    onChange={e => setNewStopForm({ ...newStopForm, sequence: parseInt(e.target.value) || undefined })}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1">Scheduled Arrival Time <span className="text-slate-400 font-normal">(optional)</span></label>
+                                <input
+                                    type="time"
+                                    className="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                    value={newStopForm.scheduledArrival || ''}
+                                    onChange={e => setNewStopForm({ ...newStopForm, scheduledArrival: e.target.value })}
+                                />
+                            </div>
+                        </div>
+                        <div className="mt-6 flex gap-3">
+                            <button
+                                type="submit"
+                                disabled={saving}
+                                className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white font-bold py-3 rounded-xl text-sm transition-colors"
+                            >
+                                {saving ? 'Saving...' : '✓ Save Stop'}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => { setSelectedMapPoint(null); setNewStopForm({}); }}
+                                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl text-sm transition-colors"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
+
             {/* Header Toolbar */}
             <div className="bg-white px-6 py-4 border-b border-slate-200 flex justify-between items-center z-10 sticky top-0 shrink-0 shadow-sm">
                 <div className="flex items-center space-x-4">
@@ -257,8 +347,11 @@ export default function GarbageRouteEditor() {
                                 <label className="block text-xs font-semibold text-slate-600 mb-1">Assigned Vehicle</label>
                                 <select
                                     className="w-full text-sm bg-slate-50 border border-slate-200 rounded-lg p-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                                    value={(route.vehicleId as GarbageVehicle)?._id || ''}
-                                    onChange={(e) => handleUpdateMeta({ vehicleId: e.target.value === '' ? null : e.target.value as any })}
+                                    value={selectedVehicleId}
+                                    onChange={(e) => {
+                                        setSelectedVehicleId(e.target.value);
+                                        handleUpdateMeta({ vehicleId: e.target.value === '' ? null : e.target.value as any });
+                                    }}
                                     disabled={isActive}
                                 >
                                     <option value="">Unassigned</option>
@@ -271,8 +364,11 @@ export default function GarbageRouteEditor() {
                                 <label className="block text-xs font-semibold text-slate-600 mb-1">Assigned Driver</label>
                                 <select
                                     className="w-full text-sm bg-slate-50 border border-slate-200 rounded-lg p-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                                    value={(route.driverId as Driver)?._id || ''}
-                                    onChange={(e) => handleUpdateMeta({ driverId: e.target.value === '' ? null : e.target.value as any })}
+                                    value={selectedDriverId}
+                                    onChange={(e) => {
+                                        setSelectedDriverId(e.target.value);
+                                        handleUpdateMeta({ driverId: e.target.value === '' ? null : e.target.value as any });
+                                    }}
                                     disabled={isActive}
                                 >
                                     <option value="">Unassigned</option>
@@ -323,37 +419,7 @@ export default function GarbageRouteEditor() {
                             </button>
                         </div>
 
-                        {isAddMode && !selectedMapPoint && (
-                            <div className="m-4 p-4 bg-amber-50 border-l-4 border-amber-500 text-amber-700 text-xs font-medium rounded-r-lg">
-                                Instruction: Click anywhere on the map to place a collection stop waypoint.
-                            </div>
-                        )}
 
-                        {selectedMapPoint && (
-                            <form onSubmit={submitNewStop} className="m-4 p-5 bg-white border-2 border-emerald-500 rounded-xl shadow-lg">
-                                <h4 className="text-sm font-bold text-slate-800 mb-3 border-b pb-2 flex items-center">
-                                    <MapPin className="w-4 h-4 mr-2 text-emerald-500" /> Confirm Stop Details
-                                </h4>
-                                <div className="space-y-3">
-                                    <div>
-                                        <label className="block text-xs font-medium text-slate-500 mb-1">Stop Sequence #</label>
-                                        <input type="number" required className="w-full text-sm border p-2 rounded" value={newStopForm.sequence || ''} onChange={e => setNewStopForm({ ...newStopForm, sequence: parseInt(e.target.value) || undefined })} />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-medium text-slate-500 mb-1">Stop Name</label>
-                                        <input type="text" required className="w-full text-sm border p-2 rounded" value={newStopForm.name || ''} onChange={e => setNewStopForm({ ...newStopForm, name: e.target.value })} />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-medium text-slate-500 mb-1">Scheduled Time (Optional)</label>
-                                        <input type="time" className="w-full text-sm border p-2 rounded" value={newStopForm.scheduledArrival || ''} onChange={e => setNewStopForm({ ...newStopForm, scheduledArrival: e.target.value })} />
-                                    </div>
-                                </div>
-                                <div className="mt-4 flex space-x-2">
-                                    <button type="submit" disabled={saving} className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded-lg text-sm">Save</button>
-                                    <button type="button" onClick={() => setSelectedMapPoint(null)} className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2 rounded-lg text-sm">Cancel</button>
-                                </div>
-                            </form>
-                        )}
 
                         <div className="p-4 space-y-3">
                             {stops.map(stop => (
@@ -414,55 +480,53 @@ export default function GarbageRouteEditor() {
 
                 {/* Right Interactive Map Area */}
                 <div className="flex-1 relative cursor-crosshair">
-                    {mapCenter ? (
-                        <div
-                            className="w-full h-full"
-                        // This is a bit of a hack to capture Leaflet map clicks easily via wrapping div.
-                        // Properly we should hook into react-leaflet useMapEvents inside a child component.
-                        // We will implement an invisible overlay to intercept clicks if we are in add mode,
-                        // or we can just rely on built-in map events if wrapped nicely.
-                        >
-                            <MapView
-                                center={mapCenter}
-                                zoom={13}
-                                className="w-full h-full rounded-br-3xl"
-                            >
-                                {/* Capture Clicks helper */}
-                                <DynamicMapEvents onClick={handleAddStopAtMap} />
-
-                                {/* Draw Route Line */}
-                                {routePolylinePoints.length > 1 && (
-                                    <RoutePath points={routePolylinePoints} color="#10b981" weight={4} dashed={!isActive} />
-                                )}
-
-                                {/* Draw Stops */}
-                                {stops.map(stop => (
-                                    <Marker
-                                        key={stop._id}
-                                        position={{ lat: stop.location.coordinates[1], lng: stop.location.coordinates[0] }}
-                                        label={stop.name}
-                                        icon="default"
-                                        popup={
-                                            <Popup>
-                                                <div className="p-1">
-                                                    <strong>Sequence: {stop.sequence}</strong><br />
-                                                    {stop.name}<br />
-                                                    {stop.scheduledArrival ? `Time: ${stop.scheduledArrival}` : ''}
-                                                </div>
-                                            </Popup>
-                                        }
-                                    />
-                                ))}
-
-                                {/* Preview pin when selecting a point on the map */}
-                                {selectedMapPoint && (
-                                    <Marker position={selectedMapPoint} label="New Stop" popup={<Popup>New Stop Placed Here</Popup>} />
-                                )}
-                            </MapView>
+                    {/* Click-to-place hint overlay */}
+                    {isAddMode && !selectedMapPoint && (
+                        <div className="absolute inset-0 z-[9999] pointer-events-none flex items-start justify-center pt-6">
+                            <div className="bg-amber-500 text-white text-sm font-bold px-5 py-3 rounded-full shadow-xl flex items-center gap-2 animate-bounce">
+                                <MapPin className="w-4 h-4" />
+                                Click anywhere on the map to place a stop
+                            </div>
                         </div>
-                    ) : (
-                        <div className="h-full flex items-center justify-center text-slate-400">Determining map location...</div>
                     )}
+
+                    <MapView
+                        center={effectiveMapCenter}
+                        zoom={stops.length > 0 ? 14 : 13}
+                        className="w-full h-full rounded-br-3xl"
+                    >
+                        {/* Capture Clicks helper */}
+                        <DynamicMapEvents onClick={handleAddStopAtMap} />
+
+                        {/* Draw Route Line */}
+                        {routePolylinePoints.length > 1 && (
+                            <RoutePath points={routePolylinePoints} color="#10b981" weight={4} dashed={!isActive} />
+                        )}
+
+                        {/* Draw Stops */}
+                        {stops.map(stop => (
+                            <Marker
+                                key={stop._id}
+                                position={{ lat: stop.location.coordinates[1], lng: stop.location.coordinates[0] }}
+                                label={stop.name}
+                                icon="default"
+                                popup={
+                                    <Popup>
+                                        <div className="p-1">
+                                            <strong>Sequence: {stop.sequence}</strong><br />
+                                            {stop.name}<br />
+                                            {stop.scheduledArrival ? `Time: ${stop.scheduledArrival}` : ''}
+                                        </div>
+                                    </Popup>
+                                }
+                            />
+                        ))}
+
+                        {/* Preview pin when selecting a point on the map */}
+                        {selectedMapPoint && (
+                            <Marker position={selectedMapPoint} label="New Stop" popup={<Popup>New Stop Placed Here</Popup>} />
+                        )}
+                    </MapView>
                 </div>
             </div>
         </div>

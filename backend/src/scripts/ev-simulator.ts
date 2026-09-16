@@ -1,35 +1,56 @@
+import dotenv from 'dotenv';
+import path from 'path';
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+
 import { connectDatabase } from '../config/database';
 import { EVChargingStation, EVConnector, City } from '../models';
 import { EVStationService } from '../services/ev/EVStationService';
 import { EVSessionService } from '../services/ev/EVSessionService';
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-import path from 'path';
-
-dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 const SIMULATION_INTERVAL = 4000;
 
 async function seedEVInfrastructure(cityId: string) {
-    let station = await EVChargingStation.findOne({ cityId, stationCode: 'EV_HUB_01' });
+    let station = await EVChargingStation.findOne({ cityId, stationCode: 'EV_UDAIPUR_01' });
     if (!station) {
         station = new EVChargingStation({
             cityId,
-            name: 'Central Plaza Fast Chargers',
-            stationCode: 'EV_HUB_01',
-            operator: 'CityPower',
+            name: 'Fateh Sagar Lake Hub',
+            stationCode: 'EV_UDAIPUR_01',
+            operator: 'ChargeGrid',
             stationType: 'PUBLIC',
             status: 'OPERATIONAL',
-            address: '100 Central Plaza, New York, NY',
+            address: 'Fateh Sagar Pal, Udaipur, RJ',
             location: {
                 type: 'Point',
-                coordinates: [-73.985, 40.758] // Times Square area approx
+                coordinates: [73.6800, 24.6000] // Long, Lat
             },
             totalConnectors: 2,
             availableConnectors: 2
         });
         await station.save();
-        console.log('⚡ Seeded EV Station: Central Plaza Fast Chargers');
+        console.log('⚡ Seeded EV Station: Fateh Sagar Lake Hub');
+    }
+
+    let station2 = await EVChargingStation.findOne({ cityId, stationCode: 'EV_UDAIPUR_02' });
+    if (!station2) {
+        station2 = new EVChargingStation({
+            cityId,
+            name: 'City Palace Rapid Charge',
+            stationCode: 'EV_UDAIPUR_02',
+            operator: 'Ather Grid',
+            stationType: 'PUBLIC',
+            status: 'OPERATIONAL',
+            address: 'City Palace Complex, Udaipur, RJ',
+            location: {
+                type: 'Point',
+                coordinates: [73.6830, 24.5760] // Long, Lat
+            },
+            totalConnectors: 1,
+            availableConnectors: 1
+        });
+        await station2.save();
+        console.log('⚡ Seeded EV Station: City Palace Rapid Charge');
     }
 
     let connector = await EVConnector.findOne({ cityId, stationId: station._id, connectorCode: 'PLUG_A' });

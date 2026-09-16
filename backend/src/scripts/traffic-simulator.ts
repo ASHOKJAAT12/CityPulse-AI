@@ -1,54 +1,74 @@
-import { connectDatabase } from '../config/database';
-import { TrafficRoad, TrafficSensor, City } from '../models';
-import { TrafficSensorService } from '../services/traffic/TrafficSensorService';
-import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import path from 'path';
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
-dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
+import { connectDatabase } from '../config/database';
+import { TrafficRoad, TrafficSensor, TrafficIncident, City } from '../models';
+import { TrafficSensorService } from '../services/traffic/TrafficSensorService';
+import mongoose from 'mongoose';
 
 const SIMULATION_INTERVAL = 3000; // 3 seconds
 
 async function seedTrafficInfrastructure(cityId: string) {
-    let road = await TrafficRoad.findOne({ cityId, roadCode: 'BROADWAY_MAIN' });
+    let road = await TrafficRoad.findOne({ cityId, roadCode: 'UDAIPUR_MAIN' });
     if (!road) {
         road = new TrafficRoad({
             cityId,
-            roadCode: 'BROADWAY_MAIN',
-            name: 'Broadway Main Arterial',
-            roadType: 'HIGHWAY',
-            length: 12.5,
-            speedLimit: 55,
+            roadCode: 'UDAIPUR_MAIN',
+            name: 'City Center Arterial',
+            roadType: 'MAIN_ROAD',
+            length: 5.5,
+            speedLimit: 40,
             lanes: 4,
-            trafficStatus: 'FREE_FLOW',
+            trafficStatus: 'HEAVY',
             geometry: {
                 type: 'LineString',
-                coordinates: [[-73.98, 40.76], [-73.99, 40.75]]
+                coordinates: [[73.7100, 24.5800], [73.7150, 24.5850], [73.7200, 24.5900]]
             }
         });
         await road.save();
-        console.log('🌱 Seeded Road: Broadway Main');
+        console.log('🌱 Seeded Road: City Center Arterial');
     }
 
-    let sensor = await TrafficSensor.findOne({ cityId, sensorCode: 'SNSR_BRD_01' });
+    let sensor = await TrafficSensor.findOne({ cityId, sensorCode: 'SNSR_UD_01' });
     if (!sensor) {
         sensor = new TrafficSensor({
             cityId,
-            sensorCode: 'SNSR_BRD_01',
-            type: 'CAMERA',
+            sensorCode: 'SNSR_UD_01',
+            sensorType: 'TRAFFIC_DENSITY',
+            unit: '%',
             roadId: road._id,
             location: {
                 type: 'Point',
-                coordinates: [-73.98, 40.76]
+                coordinates: [73.7150, 24.5850]
             },
             status: 'ONLINE',
             active: true
         });
         await sensor.save();
-        console.log('🌱 Seeded Sensor: SNSR_BRD_01 on Broadway Main');
+        console.log('🌱 Seeded Sensor: SNSR_UD_01 on City Center');
     }
 
-    return { road, sensor };
+    let incident = await TrafficIncident.findOne({ cityId, title: 'Multi-Vehicle Collision' });
+    if (!incident) {
+        incident = new TrafficIncident({
+            cityId,
+            roadId: road._id,
+            type: 'ACCIDENT',
+            severity: 'CRITICAL',
+            title: 'Multi-Vehicle Collision',
+            description: 'A major collision involving three vehicles has severely impacted the central arterial block. Emergency response dispatched.',
+            location: {
+                type: 'Point',
+                coordinates: [73.7150, 24.5850]
+            },
+            status: 'OPEN'
+        });
+        await incident.save();
+        console.log('🚨 Seeded Incident: Multi-Vehicle Collision Event');
+    }
+
+    return { road, sensor, incident };
 }
 
 async function runSimulator() {

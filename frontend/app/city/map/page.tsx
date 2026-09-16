@@ -12,14 +12,19 @@ const Marker = dynamic(() => import('../../../components/map').then(m => m.Marke
 import { getAvailableLayers } from '../../../components/map/MapConfig';
 const WaterLayer = dynamic(() => import('../../../components/map/WaterLayer').then(m => m.WaterLayer), { ssr: false });
 const ElectricityLayer = dynamic(() => import('../../../components/map/ElectricityLayer').then(m => m.ElectricityLayer), { ssr: false });
+const EVLayer = dynamic(() => import('../../../components/map/EVLayer').then(m => m.EVLayer), { ssr: false });
+const TrafficLayer = dynamic(() => import('../../../components/map/TrafficLayer').then(m => m.TrafficLayer), { ssr: false });
+const CurrentLocationLayer = dynamic(() => import('../../../components/map/CurrentLocationLayer').then(m => m.CurrentLocationLayer), { ssr: false });
 
 export default function CitizenMapPage() {
     const { user } = useAuth();
     const cityId = user?.cityId || 'default'; // In a real setup based on context/router
 
     const [activeLayers, setActiveLayers] = useState<Record<string, boolean>>({
-        WATER: true,
-        ELECTRICITY: true,
+        WATER: false,
+        ELECTRICITY: false,
+        TRAFFIC: true,
+        EV: true, // Turn on by default for visibility when they click from the EV dashboard
     });
 
     const handleLayerToggle = (key: string, enabled: boolean) => {
@@ -53,9 +58,11 @@ export default function CitizenMapPage() {
                 </div>
 
                 <MapView center={{ lat: 24.5854, lng: 73.7125 }} zoom={13} className="h-full w-full">
-
                     {activeLayers.WATER && <WaterLayer cityId={cityId} />}
                     {activeLayers.ELECTRICITY && <ElectricityLayer cityId={cityId} />}
+                    {activeLayers.EV && <EVLayer cityId={cityId} />}
+                    {activeLayers.TRAFFIC && <TrafficLayer cityId={cityId} />}
+                    <CurrentLocationLayer />
 
                 </MapView>
             </div>

@@ -182,3 +182,6 @@ export function MapPlaceholder({ className, label = 'Map' }: { className?: strin
 
 export * from './WaterLayer';
 export * from './ElectricityLayer';
+export * from './EVLayer';
+export * from './CurrentLocationLayer';
+export * from './TrafficLayer';
