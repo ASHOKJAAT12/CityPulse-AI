@@ -4,7 +4,7 @@ import { DepartmentService } from '../services/reports/DepartmentService';
 import { GeminiReportIntelligence } from '../services/intelligence/GeminiReportIntelligence';
 import { IAttachment } from '../models';
 import { cloudinary } from '../middleware/upload';
-
+import sharp from 'sharp';
 
 export class ReportController {
 
@@ -37,9 +37,14 @@ export class ReportController {
                 return res.status(400).json({ success: false, message: 'No image uploaded for analysis' });
             }
 
-            // With uploadMemory, the image is in req.file.buffer — no Cloudinary round-trip needed
-            const mimeType = req.file.mimetype;
-            const base64Data = req.file.buffer.toString('base64');
+            // Downscale massively before feeding to Gemini
+            const compressedBuffer = await sharp(req.file.buffer)
+                .resize({ width: 800, withoutEnlargement: true })
+                .jpeg({ quality: 80 })
+                .toBuffer();
+
+            const mimeType = 'image/jpeg';
+            const base64Data = compressedBuffer.toString('base64');
 
             const aiResult = await GeminiReportIntelligence.analyzeImage(mimeType, base64Data);
 

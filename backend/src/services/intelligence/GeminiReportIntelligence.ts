@@ -55,22 +55,20 @@ Description: "${description}"
 Respond ONLY with a valid minified JSON object containing:
 - "category": Broad civic category (e.g., "Infrastructure", "Waste Management", "Public Safety", "Water & Sanitation", "Electricity", "Environment")
 - "subcategory": Specific issue (e.g., "Pothole", "Garbage Collection", "Streetlight Broken", "Pipe Leak", "Noise Complaint")
-- "severity": Must be exactly one of "LOW", "MEDIUM", "HIGH", "CRITICAL".
-
-Example format:
-{"category":"Infrastructure","subcategory":"Pothole","severity":"MEDIUM"}`;
+- "severity": Must be exactly one of "LOW", "MEDIUM", "HIGH", "CRITICAL".`;
 
             const response = await withRetry((model) =>
-                ai.models.generateContent({ model, contents: prompt })
+                ai.models.generateContent({
+                    model,
+                    contents: prompt,
+                    config: { responseMimeType: 'application/json' }
+                })
             );
 
             const text = response.text;
             if (!text) return null;
 
-            const jsonMatch = text.match(/\{[\s\S]*\}/);
-            if (!jsonMatch) return null;
-
-            const parsed = JSON.parse(jsonMatch[0]);
+            const parsed = JSON.parse(text);
             return {
                 category: parsed.category || 'General',
                 subcategory: parsed.subcategory || 'Other',
@@ -90,10 +88,7 @@ Example format:
 - "description": A paragraph describing the issue, severity, and context based solely on what is visible.
 - "category": Broad civic category (e.g., "Infrastructure", "Waste Management", "Public Safety", "Water", "Electricity", "Environment")
 - "subcategory": Specific issue (e.g., "Pothole", "Garbage", "Streetlight", "Pipe")
-- "severity": Must be exactly one of "LOW", "MEDIUM", "HIGH", "CRITICAL".
-
-Example format:
-{"title":"Pothole","description":"There is a large pothole.","category":"Infrastructure","subcategory":"Pothole","severity":"MEDIUM"}`;
+- "severity": Must be exactly one of "LOW", "MEDIUM", "HIGH", "CRITICAL".`;
 
             // @google/genai v2: multimodal contents must use role/parts structure
             const response = await withRetry((model) =>
@@ -112,17 +107,15 @@ Example format:
                                 }
                             ]
                         }
-                    ]
+                    ],
+                    config: { responseMimeType: 'application/json' }
                 })
             );
 
             const text = response.text;
             if (!text) return null;
 
-            const jsonMatch = text.match(/\{[\s\S]*\}/);
-            if (!jsonMatch) return null;
-
-            const parsed = JSON.parse(jsonMatch[0]);
+            const parsed = JSON.parse(text);
             return {
                 title: parsed.title || 'Auto-Detected Issue',
                 description: parsed.description || 'Issue detected from uploaded image.',
