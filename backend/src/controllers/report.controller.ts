@@ -3,7 +3,9 @@ import { ReportService } from '../services/reports/ReportService';
 import { DepartmentService } from '../services/reports/DepartmentService';
 import { GeminiReportIntelligence } from '../services/intelligence/GeminiReportIntelligence';
 import { IAttachment } from '../models';
-import fs from 'fs';
+import { cloudinary } from '../middleware/upload';
+import https from 'https';
+import http from 'http';
 
 export class ReportController {
 
@@ -12,10 +14,12 @@ export class ReportController {
             const cityId = (req as any).user.cityId;
             const citizenId = (req as any).user.id;
 
-            // Handle multer payload mapping
+            // Handle multer-cloudinary payload – f.path is the Cloudinary URL,
+            // f.filename is the Cloudinary public_id.
             const files = req.files as Express.Multer.File[] || [];
             const attachments: IAttachment[] = files.map(f => ({
-                url: `/uploads/${f.filename}`,
+                url: (f as any).path,          // Cloudinary secure URL
+                publicId: (f as any).filename,  // Cloudinary public_id for deletion
                 fileType: f.mimetype,
                 size: f.size,
                 uploadedAt: new Date()
@@ -35,15 +39,28 @@ export class ReportController {
             }
 
             const mimeType = req.file.mimetype;
-            const base64Data = fs.readFileSync(req.file.path, { encoding: 'base64' });
+            // multer-storage-cloudinary puts the Cloudinary URL in file.path
+            const cloudinaryUrl: string = (req.file as any).path;
+            const publicId: string = (req.file as any).filename;
+
+            // Fetch the image from Cloudinary and convert to base64 for Gemini
+            const base64Data = await new Promise<string>((resolve, reject) => {
+                const client = cloudinaryUrl.startsWith('https') ? https : http;
+                client.get(cloudinaryUrl, (imgRes) => {
+                    const chunks: Buffer[] = [];
+                    imgRes.on('data', (chunk: Buffer) => chunks.push(chunk));
+                    imgRes.on('end', () => resolve(Buffer.concat(chunks).toString('base64')));
+                    imgRes.on('error', reject);
+                });
+            });
 
             const aiResult = await GeminiReportIntelligence.analyzeImage(mimeType, base64Data);
 
-            // Clean up the temporary file used for analysis
+            // Delete the temp analysis upload from Cloudinary
             try {
-                fs.unlinkSync(req.file.path);
+                await cloudinary.uploader.destroy(publicId);
             } catch (cleanupError) {
-                console.error('Failed to clear temp analysis file', cleanupError);
+                console.error('Failed to delete temp Cloudinary analysis image', cleanupError);
             }
 
             if (!aiResult) {

@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { api } from '@/lib/api';
+import api from '@/services/api';
 import { Search, Filter, AlertCircle, FileText, Activity } from 'lucide-react';
 
 export default function AdminReportsPage() {
