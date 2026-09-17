@@ -97,6 +97,36 @@ export default function SubmitReportPage() {
         }
     };
 
+    const compressImageForAnalysis = async (file: File): Promise<File> => {
+        return new Promise((resolve) => {
+            const img = new window.Image();
+            img.src = URL.createObjectURL(file);
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 800;
+                let width = img.width;
+                let height = img.height;
+
+                if (width > MAX_WIDTH) {
+                    height = height * (MAX_WIDTH / width);
+                    width = MAX_WIDTH;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                if (!ctx) return resolve(file);
+
+                ctx.drawImage(img, 0, 0, width, height);
+                canvas.toBlob((blob) => {
+                    if (!blob) return resolve(file);
+                    resolve(new File([blob], "ai_compressed.jpg", { type: "image/jpeg" }));
+                }, "image/jpeg", 0.7);
+            };
+            img.onerror = () => resolve(file);
+        });
+    };
+
     const handleAnalyzeImage = async () => {
         if (files.length === 0) {
             toast.error('Please upload an image first');
@@ -104,12 +134,16 @@ export default function SubmitReportPage() {
         }
         setAnalyzingImage(true);
         try {
+            toast.loading("Compressing & Analyzing... this takes a few seconds.", { id: 'ai-toast' });
+            const compressedFile = await compressImageForAnalysis(files[0]);
+
             const formData = new FormData();
-            formData.append('image', files[0]);
+            formData.append('image', compressedFile);
 
             const res = await api.post('/reports/city/analyze-image', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
+            toast.dismiss('ai-toast');
 
             if (res.data?.data) {
                 const aiData = res.data.data;
@@ -122,6 +156,7 @@ export default function SubmitReportPage() {
                 toast.success('AI auto-filled the form!');
             }
         } catch (error: any) {
+            toast.dismiss('ai-toast');
             toast.error(error.response?.data?.message || 'Failed to analyze image');
         } finally {
             setAnalyzingImage(false);
