@@ -35,7 +35,7 @@ export function ReportsLayer({ mode = 'citizen', cityId }: ReportsLayerProps) {
             if (!cityId) return; // Wait until cityId is available
             try {
                 const endpoint = mode === 'admin' ? '/reports/admin' : '/reports/city';
-                const res = await api.get(endpoint, { params: { limit: 200, cityId } });
+                const res = await api.get(endpoint, { params: { limit: 100, cityId } });
                 if (res.data?.data) {
                     setReports(res.data.data);
                 }
