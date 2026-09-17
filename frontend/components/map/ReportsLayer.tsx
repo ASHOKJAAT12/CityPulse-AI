@@ -67,38 +67,57 @@ export function ReportsLayer({ mode = 'citizen', cityId }: ReportsLayerProps) {
                         icon="alert"
                         color={color}
                         popup={
-                            <div className="min-w-[220px] p-1 font-sans">
+                            <div className="min-w-[240px] max-w-[280px] p-1 font-sans">
+                                {report.attachments && report.attachments.length > 0 && (
+                                    <div className="w-full h-32 mb-3 rounded-lg overflow-hidden relative bg-slate-100">
+                                        <img
+                                            src={report.attachments[0].url}
+                                            alt={report.title}
+                                            className="w-full h-full object-cover"
+                                            loading="lazy"
+                                        />
+                                    </div>
+                                )}
+
                                 <div className="flex items-start gap-2 mb-2 pb-2 border-b border-slate-100">
                                     <div
-                                        className="w-3 h-3 rounded-full mt-1 flex-shrink-0"
+                                        className="w-3 h-3 rounded-full mt-1.5 flex-shrink-0"
                                         style={{ backgroundColor: color }}
                                     />
                                     <div>
-                                        <h4 className="font-bold text-slate-800 text-sm leading-tight m-0">
+                                        <h4 className="font-bold text-slate-800 text-sm leading-tight m-0 mb-1">
                                             {report.title}
                                         </h4>
                                         <p className="text-xs text-slate-500 m-0">
-                                            #{report.reportNumber} · {report.category}
+                                            #{report.reportNumber}
                                         </p>
                                     </div>
                                 </div>
 
                                 <div className="flex items-center justify-between mb-2">
-                                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${statusClass}`}>
+                                    <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${statusClass}`}>
                                         {report.status?.replace('_', ' ')}
                                     </span>
-                                    <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color }}>
+                                    <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color }}>
                                         {severity}
                                     </span>
                                 </div>
 
-                                <p className="text-xs text-slate-600 leading-relaxed m-0 line-clamp-3">
+                                <p className="text-xs text-slate-600 leading-relaxed m-0 line-clamp-2 mb-3">
                                     {report.description}
                                 </p>
 
-                                <p className="text-[10px] text-slate-400 mt-2 m-0">
-                                    {new Date(report.createdAt).toLocaleDateString()}
-                                </p>
+                                <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
+                                    <span className="text-[10px] text-slate-400">
+                                        {new Date(report.createdAt).toLocaleDateString()}
+                                    </span>
+                                    <a
+                                        href={mode === 'admin' ? `/admin/report/${report._id}` : `/city/report/${report._id}`}
+                                        className="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-md transition-colors"
+                                    >
+                                        View Details &rarr;
+                                    </a>
+                                </div>
                             </div>
                         }
                     />
