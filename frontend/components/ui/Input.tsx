@@ -18,14 +18,17 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         return (
             <div className="w-full space-y-1.5">
                 {label && (
-                    <label htmlFor={inputId} className="block text-sm font-medium text-surface-200 dark:text-surface-200">
+                    <label
+                        htmlFor={inputId}
+                        className="block text-sm font-medium text-[#1A1D23]"
+                    >
                         {label}
-                        {props.required && <span className="text-danger-500 ml-1">*</span>}
+                        {props.required && <span className="text-red-500 ml-1">*</span>}
                     </label>
                 )}
                 <div className="relative">
                     {leftElement && (
-                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-surface-400">
+                        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#A8B0C0] pointer-events-none">
                             {leftElement}
                         </div>
                     )}
@@ -34,9 +37,13 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                         id={inputId}
                         className={cn(
                             'input-base',
-                            leftElement && 'pl-9',
-                            rightElement && 'pr-9',
-                            error && 'border-danger-500 focus:ring-danger-500',
+                            leftElement && 'pl-10',
+                            rightElement && 'pr-10',
+                            error && [
+                                'border-red-300/60',
+                                'shadow-[inset_2px_2px_6px_rgba(239,68,68,0.1),_inset_-2px_-2px_6px_rgba(255,255,255,0.9)]',
+                                'focus:ring-red-400/20 focus:border-red-300/60',
+                            ],
                             className
                         )}
                         aria-describedby={error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined}
@@ -44,18 +51,18 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                         {...props}
                     />
                     {rightElement && (
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-surface-400">
+                        <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#A8B0C0]">
                             {rightElement}
                         </div>
                     )}
                 </div>
                 {error && (
-                    <p id={`${inputId}-error`} className="text-xs text-danger-400 flex items-center gap-1">
+                    <p id={`${inputId}-error`} className="text-xs text-red-500 flex items-center gap-1 mt-1">
                         <span>⚠</span> {error}
                     </p>
                 )}
                 {hint && !error && (
-                    <p id={`${inputId}-hint`} className="text-xs text-surface-500">
+                    <p id={`${inputId}-hint`} className="text-xs text-[#A8B0C0] mt-1">
                         {hint}
                     </p>
                 )}

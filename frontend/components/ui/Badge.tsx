@@ -18,10 +18,13 @@ export interface BadgeProps {
 const variantClasses: Record<BadgeVariant, string> = {
     success: 'badge-success',
     warning: 'badge-warning',
-    danger: 'badge-danger',
-    info: 'badge-info',
+    danger:  'badge-danger',
+    info:    'badge-info',
     neutral: 'badge-neutral',
-    primary: 'inline-flex items-center rounded-full text-xs font-medium bg-primary-500/10 text-primary-400',
+    primary: [
+        'inline-flex items-center rounded-full text-xs font-medium',
+        'bg-[rgba(79,107,237,0.1)] text-[#4F6BED]',
+    ].join(' '),
 };
 
 const sizeClasses: Record<BadgeSize, string> = {
@@ -30,12 +33,12 @@ const sizeClasses: Record<BadgeSize, string> = {
 };
 
 const dotColors: Record<BadgeVariant, string> = {
-    success: 'bg-success-500',
-    warning: 'bg-warning-400',
-    danger: 'bg-danger-500',
-    info: 'bg-info-500',
-    neutral: 'bg-surface-400',
-    primary: 'bg-primary-400',
+    success: 'bg-green-500',
+    warning: 'bg-amber-500',
+    danger:  'bg-red-500',
+    info:    'bg-blue-500',
+    neutral: 'bg-[#A8B0C0]',
+    primary: 'bg-[#4F6BED]',
 };
 
 export function Badge({

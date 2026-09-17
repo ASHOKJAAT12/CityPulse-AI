@@ -4,6 +4,23 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api, { setCitizenAccessToken } from '../../services/api';
 import { useAuthStore, AuthState } from '../../store/useAuthStore';
+import { Navbar } from '@/components/ui/Navbar';
+
+const selectStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '0.625rem 0.875rem',
+    borderRadius: '0.75rem',
+    background: '#F0F2F5',
+    color: '#1A1D23',
+    boxShadow: 'inset 2px 2px 6px rgba(163,177,198,0.45), inset -2px -2px 6px rgba(255,255,255,0.9)',
+    border: '1px solid rgba(255,255,255,0.7)',
+    fontSize: '0.875rem',
+    fontFamily: 'inherit',
+    outline: 'none',
+    WebkitAppearance: 'none',
+    appearance: 'none' as any,
+    cursor: 'pointer',
+};
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -16,7 +33,7 @@ export default function RegisterPage() {
         mobile: '',
         cityId: '',
         password: '',
-        confirmPassword: ''
+        confirmPassword: '',
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -53,7 +70,7 @@ export default function RegisterPage() {
                 email: formData.email,
                 mobile: formData.mobile,
                 cityId: formData.cityId,
-                password: formData.password
+                password: formData.password,
             });
 
             if (res.data.success) {
@@ -72,70 +89,125 @@ export default function RegisterPage() {
         }
     };
 
-    return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-            <div className="max-w-md w-full bg-white rounded-lg shadow p-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Join SmartCity 360</h2>
+    const fieldStyle: React.CSSProperties = {
+        width: '100%',
+        padding: '0.625rem 0.875rem',
+        borderRadius: '0.75rem',
+        background: '#F0F2F5',
+        color: '#1A1D23',
+        boxShadow: 'inset 2px 2px 6px rgba(163,177,198,0.45), inset -2px -2px 6px rgba(255,255,255,0.9)',
+        border: '1px solid rgba(255,255,255,0.7)',
+        fontSize: '0.875rem',
+        fontFamily: 'inherit',
+        outline: 'none',
+    };
 
-                {error && <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md text-sm">{error}</div>}
+    return (
+        <div
+            className="min-h-screen flex flex-col"
+            style={{ backgroundColor: '#F0F2F5' }}
+        >
+            <Navbar />
+
+            <div className="flex-1 flex flex-col items-center justify-center p-6 py-10">
+            {/* Card */}
+            <div
+                className="w-full max-w-md rounded-3xl p-8"
+                style={{
+                    background: '#FFFFFF',
+                    boxShadow: '10px 10px 24px rgba(163,177,198,0.5), -10px -10px 24px rgba(255,255,255,0.92)',
+                    border: '1px solid rgba(255,255,255,0.8)',
+                }}
+            >
+                <div className="mb-7 text-center">
+                    <h1 className="text-xl font-bold text-[#1A1D23]">Create your account</h1>
+                    <p className="text-sm text-[#7B8494] mt-1">Join CityPulse AI — your smart city portal</p>
+                </div>
+
+                {/* Error */}
+                {error && (
+                    <div
+                        className="mb-5 px-4 py-3 rounded-xl text-sm text-red-600 font-medium"
+                        style={{ background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.15)' }}
+                    >
+                        ⚠ {error}
+                    </div>
+                )}
 
                 <form onSubmit={onSubmit} className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Full Name</label>
-                        <input type="text" name="name"
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    {/* Full Name */}
+                    <div className="space-y-1.5">
+                        <label className="block text-sm font-medium text-[#1A1D23]">Full Name</label>
+                        <input type="text" name="name" style={fieldStyle} placeholder="John Smith"
                             value={formData.name} onChange={handleChange} required />
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Email Address</label>
-                        <input type="email" name="email"
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    {/* Email */}
+                    <div className="space-y-1.5">
+                        <label className="block text-sm font-medium text-[#1A1D23]">Email Address</label>
+                        <input type="email" name="email" style={fieldStyle} placeholder="you@example.com"
                             value={formData.email} onChange={handleChange} required />
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Mobile Number</label>
-                        <input type="text" name="mobile"
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    {/* Mobile */}
+                    <div className="space-y-1.5">
+                        <label className="block text-sm font-medium text-[#1A1D23]">Mobile Number</label>
+                        <input type="text" name="mobile" style={fieldStyle} placeholder="10-digit number"
                             value={formData.mobile} onChange={handleChange} required pattern="[0-9]{10}" title="Must be a 10 digit number" />
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Select Your City</label>
-                        <select name="cityId"
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                            value={formData.cityId} onChange={handleChange} required>
-                            <option value="" disabled>Select a city</option>
-                            {cities.map(city => (
-                                <option key={city.id} value={city.id}>{city.name}, {city.state}</option>
-                            ))}
-                        </select>
+                    {/* City Select */}
+                    <div className="space-y-1.5">
+                        <label className="block text-sm font-medium text-[#1A1D23]">Select Your City</label>
+                        <div className="relative">
+                            <select name="cityId" style={selectStyle} value={formData.cityId} onChange={handleChange} required>
+                                <option value="" disabled>Select a city</option>
+                                {cities.map(city => (
+                                    <option key={city.id} value={city.id}>{city.name}, {city.state}</option>
+                                ))}
+                            </select>
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A8B0C0] pointer-events-none text-xs">▾</span>
+                        </div>
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Password</label>
-                        <input type="password" name="password"
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    {/* Password */}
+                    <div className="space-y-1.5">
+                        <label className="block text-sm font-medium text-[#1A1D23]">Password</label>
+                        <input type="password" name="password" style={fieldStyle} placeholder="Min. 8 characters"
                             value={formData.password} onChange={handleChange} required minLength={8} />
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
-                        <input type="password" name="confirmPassword"
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    {/* Confirm Password */}
+                    <div className="space-y-1.5">
+                        <label className="block text-sm font-medium text-[#1A1D23]">Confirm Password</label>
+                        <input type="password" name="confirmPassword" style={fieldStyle} placeholder="Repeat password"
                             value={formData.confirmPassword} onChange={handleChange} required minLength={8} />
                     </div>
 
-                    <button type="submit" disabled={loading}
-                        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        {loading ? 'Registering...' : 'Register'}
+                    {/* Submit */}
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full py-3 rounded-2xl text-sm font-semibold text-[#4F6BED] transition-all duration-200 mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{
+                            background: '#FFFFFF',
+                            boxShadow: loading
+                                ? 'inset 4px 4px 10px rgba(163,177,198,0.5), inset -4px -4px 10px rgba(255,255,255,0.9)'
+                                : '6px 6px 14px rgba(163,177,198,0.55), -6px -6px 14px rgba(255,255,255,0.92)',
+                            border: '1px solid rgba(255,255,255,0.8)',
+                        }}
+                    >
+                        {loading ? 'Creating account...' : 'Create Account'}
                     </button>
 
-                    <p className="text-sm text-center text-gray-600 mt-4">
-                        Already have an account? <Link href="/login" className="text-indigo-600 hover:text-indigo-500 font-medium">Login</Link>
+                    <p className="text-sm text-center text-[#A8B0C0] pt-1">
+                        Already have an account?{' '}
+                        <Link href="/login" className="text-[#4F6BED] font-semibold hover:underline">
+                            Sign in
+                        </Link>
                     </p>
                 </form>
+            </div>
             </div>
         </div>
     );
