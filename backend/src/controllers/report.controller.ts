@@ -69,6 +69,19 @@ export class ReportController {
         }
     }
 
+    static async getCityReports(req: Request, res: Response, next: NextFunction) {
+        try {
+            const cityId = (req as any).user.cityId;
+            const page = parseInt(req.query.page as string) || 1;
+            const limit = parseInt(req.query.limit as string) || 50;
+
+            const result = await ReportService.getReports(cityId, req.query, { page, limit });
+            res.status(200).json({ success: true, ...result });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     static async getAdminReports(req: Request, res: Response, next: NextFunction) {
         try {
             // Safe checking mapping

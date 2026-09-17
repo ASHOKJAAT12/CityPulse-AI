@@ -32,9 +32,10 @@ export function ReportsLayer({ mode = 'citizen', cityId }: ReportsLayerProps) {
 
     useEffect(() => {
         const fetchReports = async () => {
+            if (!cityId) return; // Wait until cityId is available
             try {
-                const endpoint = mode === 'admin' ? '/reports/admin' : '/reports/city/my';
-                const res = await api.get(endpoint, { params: { limit: 200 } });
+                const endpoint = mode === 'admin' ? '/reports/admin' : '/reports/city';
+                const res = await api.get(endpoint, { params: { limit: 200, cityId } });
                 if (res.data?.data) {
                     setReports(res.data.data);
                 }

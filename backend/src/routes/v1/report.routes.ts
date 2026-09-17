@@ -39,6 +39,16 @@ router.post(
     ReportController.analyzeImage
 );
 
+// Get all city reports (Public map view)
+router.get(
+    '/city',
+    authenticate,
+    requireRole(Role.CITIZEN),
+    requireCityAccess((req) => (req as any).user.cityId),
+    validate(reportQuerySchema, 'query'),
+    ReportController.getCityReports
+);
+
 // Get my reports (history)
 router.get(
     '/city/my',
