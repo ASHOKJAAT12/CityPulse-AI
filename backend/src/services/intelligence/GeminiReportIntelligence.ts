@@ -3,8 +3,8 @@ import { GoogleGenAI } from '@google/genai';
 // Singleton client — instantiated once, reused for all requests
 let _geminiClient: GoogleGenAI | null = null;
 
-const PRIMARY_MODEL = 'gemini-2.0-flash';
-const FALLBACK_MODEL = 'gemini-1.5-flash';
+const PRIMARY_MODEL = 'gemini-3.5-flash';
+const FALLBACK_MODEL = 'gemini-3.5-flash-lite';
 
 /** Sleep for `ms` milliseconds */
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
