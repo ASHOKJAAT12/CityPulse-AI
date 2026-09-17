@@ -13,6 +13,7 @@ const GarbageLayer = dynamic(() => import('../../../components/map/GarbageLayer'
 const WaterLayer = dynamic(() => import('../../../components/map/WaterLayer').then(m => m.WaterLayer), { ssr: false });
 const ElectricityLayer = dynamic(() => import('../../../components/map/ElectricityLayer').then(m => m.ElectricityLayer), { ssr: false });
 const IntelligenceLayer = dynamic(() => import('../../../components/map/IntelligenceLayer').then(m => m.IntelligenceLayer), { ssr: false });
+const ReportsLayer = dynamic(() => import('../../../components/map/ReportsLayer').then(m => m.ReportsLayer), { ssr: false });
 export default function AdminMapPage() {
     const [mapData, setMapData] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -22,6 +23,7 @@ export default function AdminMapPage() {
     // Map Layers State
     const [activeLayers, setActiveLayers] = useState<Record<string, boolean>>({
         GARBAGE: false,
+        REPORTS: true,
     });
 
     const handleLayerToggle = (key: string, enabled: boolean) => {
@@ -112,6 +114,7 @@ export default function AdminMapPage() {
                     {activeLayers.WATER && <WaterLayer cityId={mapData?.cityId} visible={activeLayers.WATER} />}
                     {activeLayers.ELECTRICITY && <ElectricityLayer cityId={mapData?.cityId} visible={activeLayers.ELECTRICITY} />}
                     {activeLayers.INTELLIGENCE && <IntelligenceLayer cityId={mapData?.cityId} visible={activeLayers.INTELLIGENCE} centerLat={center.lat} centerLng={center.lng} />}
+                    {activeLayers.REPORTS && <ReportsLayer mode="admin" cityId={mapData?.cityId} />}
                 </MapView>
             </div>
 

@@ -11,6 +11,7 @@ import api from '../../services/api';
 // SSR must be disabled for Leaflet to attach to Window object
 const MapView = dynamic(() => import('../../components/map').then(m => m.MapView), { ssr: false });
 const Marker = dynamic(() => import('../../components/map').then(m => m.Marker), { ssr: false });
+const ReportsLayer = dynamic(() => import('../../components/map/ReportsLayer').then(m => m.ReportsLayer), { ssr: false });
 
 import { getAllLayers } from '../../components/map/MapConfig';
 
@@ -107,11 +108,16 @@ export default function AppHome() {
                         <MapLegend layers={layers} />
                     </div>
 
-                    {/* Primary City Marker (Fallback if plugins aren't ready) */}
+                    {/* Primary City Marker */}
                     <Marker
                         position={{ lat: currentCity.latitude, lng: currentCity.longitude }}
                         label={currentCity.name + " Center"}
                     />
+
+                    {/* Citizen Reports Layer */}
+                    {layers.find(l => l.key === 'REPORTS')?.enabled && (
+                        <ReportsLayer mode="citizen" cityId={user?.cityId} />
+                    )}
                 </MapView>
             </div>
 

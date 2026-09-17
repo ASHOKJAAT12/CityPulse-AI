@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { ReportController } from '../../controllers/report.controller';
 import { authenticate, requireRole, requireCityAccess } from '../../middleware/auth';
-import { uploadAttachment } from '../../middleware/upload';
+import { uploadAttachment, uploadMemory } from '../../middleware/upload';
 import { validate, validateAll } from '../../middleware/validate';
 import {
     createReportSchema,
@@ -35,7 +35,7 @@ router.post(
     authenticate,
     requireRole(Role.CITIZEN),
     requireCityAccess((req) => (req as any).user.cityId),
-    uploadAttachment.single('image'),
+    uploadMemory.single('image'),
     ReportController.analyzeImage
 );
 

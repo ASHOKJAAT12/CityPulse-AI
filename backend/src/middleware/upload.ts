@@ -46,3 +46,16 @@ export const uploadAttachment = multer({
 
 // Re-export cloudinary so other modules can call destroy(), etc.
 export { cloudinary };
+
+/**
+ * In-memory multer — used ONLY for the analyze-image route.
+ * The image buffer is passed directly to Gemini; no Cloudinary round-trip needed.
+ */
+export const uploadMemory = multer({
+    storage: multer.memoryStorage(),
+    fileFilter,
+    limits: {
+        fileSize: 10 * 1024 * 1024, // 10 MB
+        files: 1,
+    },
+});

@@ -129,12 +129,12 @@ export default function ReportDetailPage() {
                                     {report.attachments.map((file: any, i: number) => (
                                         <a
                                             key={i}
-                                            href={api.defaults.baseURL?.replace('/api/v1', '') + file.url || file.url}
+                                            href={file.url}
                                             target="_blank"
                                             rel="noreferrer"
                                         >
                                             <img
-                                                src={api.defaults.baseURL?.replace('/api/v1', '') + file.url || file.url}
+                                                src={file.url}
                                                 alt="Attachment"
                                                 className="h-32 w-48 object-cover rounded-lg border shadow-sm flex-shrink-0"
                                             />

@@ -43,6 +43,7 @@ export interface MarkerProps {
     position: LatLng;
     label?: string;
     icon?: 'default' | 'garbage' | 'ev' | 'alert' | 'city';
+    color?: string;
     popup?: React.ReactNode;
     onClick?: () => void;
 }
@@ -115,11 +116,27 @@ export function MapView({
 
 // ── Marker ────────────────────────────────────────────────────
 
-export function Marker({ position, label, popup, onClick }: MarkerProps) {
+export function Marker({ position, label, popup, onClick, color }: MarkerProps) {
+    const markerIcon = color
+        ? L.divIcon({
+            className: '',
+            html: `<div style="
+                  width:16px;height:16px;border-radius:50%;
+                  background:${color};
+                  border:2.5px solid white;
+                  box-shadow:0 1px 4px rgba(0,0,0,0.45);
+              "></div>`,
+            iconSize: [16, 16],
+            iconAnchor: [8, 8],
+            popupAnchor: [0, -10],
+        })
+        : DefaultIcon;
+
     return (
         <LeafletMarker
             position={[position.lat, position.lng]}
             title={label}
+            icon={markerIcon}
             eventHandlers={onClick ? { click: onClick } : undefined}
         >
             {popup && <LeafletPopup>{popup}</LeafletPopup>}

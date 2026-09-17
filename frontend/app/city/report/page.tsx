@@ -1,17 +1,33 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import api from '@/services/api';
 import toast from 'react-hot-toast';
-import { Camera, MapPin, CheckCircle, AlertTriangle, Sparkles } from 'lucide-react';
+import { Camera, MapPin, Crosshair, Sparkles } from 'lucide-react';
+import { useAuthStore } from '@/store/useAuthStore';
+
+// LocationPickerMap must be loaded client-side only (Leaflet needs window)
+const LocationPickerMap = dynamic(
+    () => import('@/components/map/LocationPickerMap').then(m => m.LocationPickerMap),
+    {
+        ssr: false,
+        loading: () => (
+            <div className="w-full h-full flex items-center justify-center bg-muted/20 text-sm text-muted-foreground">
+                Loading map…
+            </div>
+        )
+    }
+);
 
 export default function SubmitReportPage() {
     const router = useRouter();
-    const [step, setStep] = useState(1);
+    const { currentCity, user } = useAuthStore();
     const [loading, setLoading] = useState(false);
     const [analyzingImage, setAnalyzingImage] = useState(false);
+    const [locating, setLocating] = useState(false);
 
-    // Form payload
+    // Form state
     const [category, setCategory] = useState('OTHER');
     const [subcategory, setSubcategory] = useState('');
     const [title, setTitle] = useState('');
@@ -19,20 +35,43 @@ export default function SubmitReportPage() {
     const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
     const [files, setFiles] = useState<File[]>([]);
 
-    // Extracted categories matching Zod payload
     const categories = [
         'WATER', 'ELECTRICITY', 'TRAFFIC', 'GARBAGE',
         'STREETLIGHT', 'EV', 'ROAD', 'DRAINAGE',
         'PUBLIC_SAFETY', 'ENVIRONMENT', 'OTHER'
     ];
 
+    // Default map center: city center or Udaipur fallback
+    const defaultCenter = currentCity
+        ? { lat: currentCity.latitude, lng: currentCity.longitude }
+        : { lat: 24.5854, lng: 73.7125 };
+
+    const handleAutoLocate = () => {
+        if (!('geolocation' in navigator)) {
+            toast.error('Geolocation is not supported by your browser');
+            return;
+        }
+        setLocating(true);
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+                toast.success('Location pinned! Verify on the map and adjust if needed.');
+                setLocating(false);
+            },
+            () => {
+                toast.error('Could not get GPS location. Click on the map to pin manually.');
+                setLocating(false);
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!location) {
-            toast.error("Please drop a pin on the map");
+            toast.error('Please pin the location on the map');
             return;
         }
-
         setLoading(true);
         try {
             const formData = new FormData();
@@ -43,19 +82,16 @@ export default function SubmitReportPage() {
             formData.append('longitude', location.lng.toString());
             formData.append('latitude', location.lat.toString());
             formData.append('source', 'WEB');
-
-            files.forEach(f => {
-                formData.append('attachments', f);
-            });
+            files.forEach(f => formData.append('attachments', f));
 
             await api.post('/reports/city', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
 
-            toast.success("Report submitted successfully");
+            toast.success('Report submitted successfully');
             router.push('/city/my-reports');
         } catch (error: any) {
-            toast.error(error.response?.data?.message || "Failed to submit report");
+            toast.error(error.response?.data?.message || 'Failed to submit report');
         } finally {
             setLoading(false);
         }
@@ -63,10 +99,9 @@ export default function SubmitReportPage() {
 
     const handleAnalyzeImage = async () => {
         if (files.length === 0) {
-            toast.error("Please upload an image first");
+            toast.error('Please upload an image first');
             return;
         }
-
         setAnalyzingImage(true);
         try {
             const formData = new FormData();
@@ -76,19 +111,18 @@ export default function SubmitReportPage() {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
 
-            if (res.data && res.data.data) {
+            if (res.data?.data) {
                 const aiData = res.data.data;
                 setTitle(aiData.title);
                 setDescription(aiData.description);
-                // Try to match uppercase category precisely, otherwise fallback
                 const aiCatNormalized = aiData.category.toUpperCase().replace(/\s/g, '_');
                 if (categories.includes(aiCatNormalized)) {
                     setCategory(aiCatNormalized);
                 }
-                toast.success("AI auto-filled the form!");
+                toast.success('AI auto-filled the form!');
             }
         } catch (error: any) {
-            toast.error(error.response?.data?.message || "Failed to analyze image");
+            toast.error(error.response?.data?.message || 'Failed to analyze image');
         } finally {
             setAnalyzingImage(false);
         }
@@ -98,11 +132,13 @@ export default function SubmitReportPage() {
         <div className="p-6 max-w-4xl mx-auto space-y-6">
             <div>
                 <h1 className="text-3xl font-bold tracking-tight">Report an Issue</h1>
-                <p className="text-muted-foreground mt-2">Help improve your city by reporting infrastructure or civic issues.</p>
+                <p className="text-muted-foreground mt-2">
+                    Help improve your city by reporting infrastructure or civic issues.
+                </p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Form Side */}
+                {/* ── Form Side ── */}
                 <div className="bg-card shadow rounded-xl p-6 border">
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
@@ -110,7 +146,7 @@ export default function SubmitReportPage() {
                             <select
                                 value={category}
                                 onChange={e => setCategory(e.target.value)}
-                                className="w-full flex h-10 rounded-md border bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                className="w-full flex h-10 rounded-md border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                             >
                                 {categories.map(c => <option key={c} value={c}>{c}</option>)}
                             </select>
@@ -124,7 +160,7 @@ export default function SubmitReportPage() {
                                 value={title}
                                 onChange={e => setTitle(e.target.value)}
                                 className="w-full flex h-10 rounded-md border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                placeholder="E.g. Broken water pipe"
+                                placeholder="E.g. Broken water pipe on Main Street"
                             />
                         </div>
 
@@ -139,17 +175,26 @@ export default function SubmitReportPage() {
                             />
                         </div>
 
+                        {/* File Upload */}
                         <div>
                             <label className="block text-sm font-medium mb-1">Upload Photos</label>
                             <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md border-muted-foreground/30 hover:border-primary/50 transition-colors bg-muted/20">
                                 <div className="space-y-1 text-center">
                                     <Camera className="mx-auto h-12 w-12 text-muted-foreground/50" />
                                     <div className="flex text-sm mt-4 justify-center">
-                                        <label htmlFor="file-upload" className="relative cursor-pointer rounded-md font-medium text-primary hover:text-primary focus-within:outline-none">
+                                        <label htmlFor="file-upload" className="relative cursor-pointer rounded-md font-medium text-primary hover:text-primary/80">
                                             <span>Upload a file</span>
-                                            <input id="file-upload" name="file-upload" type="file" className="sr-only" multiple accept="image/*" onChange={(e) => {
-                                                if (e.target.files) setFiles(Array.from(e.target.files));
-                                            }} />
+                                            <input
+                                                id="file-upload"
+                                                name="file-upload"
+                                                type="file"
+                                                className="sr-only"
+                                                multiple
+                                                accept="image/*"
+                                                onChange={e => {
+                                                    if (e.target.files) setFiles(Array.from(e.target.files));
+                                                }}
+                                            />
                                         </label>
                                     </div>
                                     <p className="text-xs text-muted-foreground pt-1">
@@ -157,6 +202,7 @@ export default function SubmitReportPage() {
                                     </p>
                                 </div>
                             </div>
+
                             {files.length > 0 && (
                                 <button
                                     type="button"
@@ -165,7 +211,7 @@ export default function SubmitReportPage() {
                                     className="mt-2 w-full py-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-md font-medium shadow flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-50"
                                 >
                                     <Sparkles className="w-4 h-4" />
-                                    {analyzingImage ? "Analyzing Image..." : "Auto-Fill with AI ✨"}
+                                    {analyzingImage ? 'Analyzing Image...' : 'Auto-Fill with AI ✨'}
                                 </button>
                             )}
                         </div>
@@ -181,7 +227,7 @@ export default function SubmitReportPage() {
                             <button
                                 type="submit"
                                 disabled={loading || !location}
-                                className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors flex justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {loading ? 'Submitting...' : 'Submit Report'}
                             </button>
@@ -189,43 +235,53 @@ export default function SubmitReportPage() {
                     </form>
                 </div>
 
-                {/* Map Side */}
-                <div className="flex flex-col gap-4">
-                    <div className="bg-card shadow rounded-xl p-4 border flex items-start gap-4">
-                        <MapPin className="text-primary w-8 h-8 flex-shrink-0" />
+                {/* ── Map Side ── */}
+                <div className="flex flex-col gap-3">
+                    <div className="bg-card shadow rounded-xl p-4 border flex items-start gap-3">
+                        <MapPin className="text-primary w-7 h-7 flex-shrink-0 mt-0.5" />
                         <div>
-                            <h3 className="font-semibold text-lg">Pinpoint the Location</h3>
-                            <p className="text-sm text-muted-foreground">Click the map to drop a pin precisely where the issue occurred. This ensures swift resolution times.</p>
+                            <h3 className="font-semibold">Pinpoint the Location</h3>
+                            <p className="text-sm text-muted-foreground">
+                                <strong>Click anywhere on the map</strong> to drop a pin exactly where the issue is, or use Auto-Pin to detect your current GPS position.
+                            </p>
                         </div>
                     </div>
 
-                    <div className="flex-1 rounded-xl overflow-hidden shadow border min-h-[400px] flex items-center justify-center bg-muted/20 relative">
-                        <div className="absolute top-4 right-4 z-[400] bg-white/90 backdrop-blur px-3 py-1.5 rounded-full shadow border text-sm font-medium text-green-700 flex items-center gap-2">
-                            <CheckCircle className="w-4 h-4" /> Geolocation Activated
-                        </div>
+                    {/* Real interactive Leaflet map */}
+                    <div className="flex-1 rounded-xl overflow-hidden shadow border min-h-[400px] relative">
+                        <LocationPickerMap
+                            value={location}
+                            onChange={setLocation}
+                            defaultCenter={defaultCenter}
+                        />
+
+                        {/* Auto-locate button — floats over the map */}
                         <button
-                            onClick={(e) => {
-                                e.preventDefault();
-                                if ('geolocation' in navigator) {
-                                    navigator.geolocation.getCurrentPosition(
-                                        (pos) => {
-                                            setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-                                            toast.success("Location identified accurately!");
-                                        },
-                                        (error) => {
-                                            toast.error("Failed to retrieve location. Please check browser permissions.");
-                                        },
-                                        { enableHighAccuracy: true }
-                                    );
-                                } else {
-                                    toast.error("Geolocation is not supported by your browser");
-                                }
-                            }}
-                            className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow transition-colors"
+                            type="button"
+                            onClick={handleAutoLocate}
+                            disabled={locating}
+                            className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[400] flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white text-sm font-medium rounded-full shadow-lg transition-colors whitespace-nowrap"
                         >
-                            Auto-Pin My Location
+                            <Crosshair className="w-4 h-4" />
+                            {locating ? 'Detecting GPS…' : 'Auto-Pin My Location'}
                         </button>
                     </div>
+
+                    {/* Live coordinate feedback */}
+                    {location ? (
+                        <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-2.5 text-sm text-green-800 flex items-center gap-2">
+                            <MapPin className="w-4 h-4 flex-shrink-0" />
+                            <span>
+                                Pin: <strong>{location.lat.toFixed(5)}</strong>, <strong>{location.lng.toFixed(5)}</strong>
+                                {' '}— click the map to reposition.
+                            </span>
+                        </div>
+                    ) : (
+                        <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-2.5 text-sm text-amber-800 flex items-center gap-2">
+                            <MapPin className="w-4 h-4 flex-shrink-0" />
+                            <span>No location set — click the map or use Auto-Pin.</span>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

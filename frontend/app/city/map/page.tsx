@@ -15,6 +15,7 @@ const ElectricityLayer = dynamic(() => import('../../../components/map/Electrici
 const EVLayer = dynamic(() => import('../../../components/map/EVLayer').then(m => m.EVLayer), { ssr: false });
 const TrafficLayer = dynamic(() => import('../../../components/map/TrafficLayer').then(m => m.TrafficLayer), { ssr: false });
 const CurrentLocationLayer = dynamic(() => import('../../../components/map/CurrentLocationLayer').then(m => m.CurrentLocationLayer), { ssr: false });
+const ReportsLayer = dynamic(() => import('../../../components/map/ReportsLayer').then(m => m.ReportsLayer), { ssr: false });
 
 export default function CitizenMapPage() {
     const { user } = useAuth();
@@ -24,7 +25,8 @@ export default function CitizenMapPage() {
         WATER: false,
         ELECTRICITY: false,
         TRAFFIC: true,
-        EV: true, // Turn on by default for visibility when they click from the EV dashboard
+        EV: true,
+        REPORTS: true,
     });
 
     const handleLayerToggle = (key: string, enabled: boolean) => {
@@ -62,6 +64,7 @@ export default function CitizenMapPage() {
                     {activeLayers.ELECTRICITY && <ElectricityLayer cityId={cityId} />}
                     {activeLayers.EV && <EVLayer cityId={cityId} />}
                     {activeLayers.TRAFFIC && <TrafficLayer cityId={cityId} />}
+                    {activeLayers.REPORTS && <ReportsLayer mode="citizen" cityId={cityId} />}
                     <CurrentLocationLayer />
 
                 </MapView>

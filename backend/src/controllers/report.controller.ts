@@ -4,8 +4,7 @@ import { DepartmentService } from '../services/reports/DepartmentService';
 import { GeminiReportIntelligence } from '../services/intelligence/GeminiReportIntelligence';
 import { IAttachment } from '../models';
 import { cloudinary } from '../middleware/upload';
-import https from 'https';
-import http from 'http';
+
 
 export class ReportController {
 
@@ -38,30 +37,11 @@ export class ReportController {
                 return res.status(400).json({ success: false, message: 'No image uploaded for analysis' });
             }
 
+            // With uploadMemory, the image is in req.file.buffer — no Cloudinary round-trip needed
             const mimeType = req.file.mimetype;
-            // multer-storage-cloudinary puts the Cloudinary URL in file.path
-            const cloudinaryUrl: string = (req.file as any).path;
-            const publicId: string = (req.file as any).filename;
-
-            // Fetch the image from Cloudinary and convert to base64 for Gemini
-            const base64Data = await new Promise<string>((resolve, reject) => {
-                const client = cloudinaryUrl.startsWith('https') ? https : http;
-                client.get(cloudinaryUrl, (imgRes) => {
-                    const chunks: Buffer[] = [];
-                    imgRes.on('data', (chunk: Buffer) => chunks.push(chunk));
-                    imgRes.on('end', () => resolve(Buffer.concat(chunks).toString('base64')));
-                    imgRes.on('error', reject);
-                });
-            });
+            const base64Data = req.file.buffer.toString('base64');
 
             const aiResult = await GeminiReportIntelligence.analyzeImage(mimeType, base64Data);
-
-            // Delete the temp analysis upload from Cloudinary
-            try {
-                await cloudinary.uploader.destroy(publicId);
-            } catch (cleanupError) {
-                console.error('Failed to delete temp Cloudinary analysis image', cleanupError);
-            }
 
             if (!aiResult) {
                 return res.status(500).json({ success: false, message: 'AI limit exceeded or failed to analyze image.' });
