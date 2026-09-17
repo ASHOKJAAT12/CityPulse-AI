@@ -10,6 +10,7 @@ import {
     Droplet, Zap, Navigation, Battery, Lightbulb, Trash2, Edit3, ClipboardList,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import { CityPulseLogo } from '../../components/ui/CityPulseLogo';
 
 const navItems = [
     {
@@ -103,15 +104,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 className="min-h-screen flex flex-col items-center justify-center gap-4"
                 style={{ backgroundColor: '#F0F2F5' }}
             >
-                <div
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl"
-                    style={{
-                        background: '#FFFFFF',
-                        boxShadow: '6px 6px 14px rgba(163,177,198,0.55), -6px -6px 14px rgba(255,255,255,0.92)',
-                    }}
-                >
-                    🏙️
-                </div>
+                <CityPulseLogo size="lg" variant="icon" />
                 <p className="text-sm font-medium text-[#7B8494] tracking-wide">
                     Loading CityPulse AI...
                 </p>
@@ -132,21 +125,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 }}
             >
                 {/* Logo */}
-                <div className="p-5 border-b border-[#F0F2F5]">
-                    <Link href="/app" className="flex items-center gap-2.5 group">
-                        <div
-                            className="w-9 h-9 rounded-xl flex items-center justify-center text-lg shrink-0 transition-all duration-200"
-                            style={{
-                                background: '#F0F2F5',
-                                boxShadow: 'inset 2px 2px 5px rgba(163,177,198,0.4), inset -2px -2px 5px rgba(255,255,255,0.85)',
-                            }}
-                        >
-                            🏙️
-                        </div>
-                        <div>
-                            <div className="text-sm font-bold text-[#1A1D23] tracking-tight leading-none">CityPulse AI</div>
-                            <div className="text-xs text-[#A8B0C0] mt-0.5">Citizen Portal</div>
-                        </div>
+                <div className="p-4 border-b border-[#F0F2F5]">
+                    <Link href="/app" className="block group">
+                        <CityPulseLogo size="sm" variant="full" />
                     </Link>
                 </div>
 
@@ -168,9 +149,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
                 {/* User Footer */}
                 <div className="p-4 border-t border-[#F0F2F5]">
-                    <div className="flex items-center mb-3 px-1">
+                    <Link href="/app/profile" className="flex items-center mb-3 px-1 p-1.5 rounded-xl hover:bg-[#F0F2F5] transition-all group">
                         <div
-                            className="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-sm uppercase text-[#4F6BED] shrink-0"
+                            className="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-sm uppercase text-[#4F6BED] shrink-0 group-hover:scale-105 transition-transform"
                             style={{
                                 background: '#EEF1FD',
                                 boxShadow: 'inset 2px 2px 5px rgba(163,177,198,0.3), inset -2px -2px 5px rgba(255,255,255,0.9)',
@@ -179,10 +160,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                             {user?.name?.[0] || 'C'}
                         </div>
                         <div className="ml-2.5 overflow-hidden">
-                            <p className="text-sm font-semibold text-[#1A1D23] truncate">{user?.name}</p>
-                            <p className="text-xs text-[#A8B0C0] truncate">Citizen</p>
+                            <p className="text-sm font-semibold text-[#1A1D23] group-hover:text-[#4F6BED] transition-colors truncate">{user?.name}</p>
+                            <p className="text-xs text-[#A8B0C0] truncate">Citizen Profile →</p>
                         </div>
-                    </div>
+                    </Link>
                     <button
                         onClick={() => logout()}
                         className={cn(
@@ -210,11 +191,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 }}
             >
                 <Link href="/app" className="flex items-center gap-2">
-                    <span className="text-lg">🏙️</span>
-                    <span className="font-bold text-sm text-[#1A1D23] tracking-tight">CityPulse AI</span>
+                    <CityPulseLogo size="sm" variant="compact" />
                 </Link>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                     <NotificationBell token={useAuthStore.getState().accessToken || undefined} />
+                    <Link
+                        href="/app/profile"
+                        className="p-1.5 rounded-xl text-xs font-bold text-[#4F6BED] bg-[#EEF1FD]"
+                    >
+                        {user?.name?.[0] || 'C'}
+                    </Link>
                     <button
                         onClick={() => logout()}
                         className="p-2 rounded-xl text-[#7B8494] hover:text-red-500 transition-colors"
@@ -248,6 +234,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     <div className="flex items-center gap-4">
                         {currentCity && <CitySearchBox />}
                         <NotificationBell token={useAuthStore.getState().accessToken || undefined} />
+                        <Link
+                            href="/app/profile"
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-[#F0F2F5] transition-all text-xs font-semibold text-[#1A1D23]"
+                            style={{
+                                background: '#FFFFFF',
+                                boxShadow: '3px 3px 8px rgba(163,177,198,0.35), -3px -3px 8px rgba(255,255,255,0.85)',
+                                border: '1px solid rgba(255,255,255,0.8)',
+                            }}
+                        >
+                            <div className="w-6 h-6 rounded-lg bg-[#EEF1FD] text-[#4F6BED] font-bold flex items-center justify-center text-xs">
+                                {user?.name?.[0] || 'C'}
+                            </div>
+                            <span>Citizen Profile</span>
+                        </Link>
                     </div>
                 </header>
 

@@ -5,3 +5,4 @@ export * from './Card';
 export * from './Input';
 export * from './Toggle';
 export * from './Navbar';
+export * from './CityPulseLogo';

@@ -5,6 +5,7 @@ import { Shield, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Navbar } from '@/components/ui/Navbar';
+import { CityPulseLogo } from '@/components/ui/CityPulseLogo';
 
 const inputStyle: React.CSSProperties = {
     width: '100%',
@@ -54,19 +55,12 @@ export default function AdminLoginPage() {
             <div className="w-full max-w-sm">
 
                 {/* Logo / Brand */}
-                <div className="text-center mb-10">
-                    <div
-                        className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center mb-5 transition-transform duration-300 hover:scale-105"
-                        style={{
-                            background: '#FFFFFF',
-                            boxShadow: '8px 8px 18px rgba(163,177,198,0.55), -8px -8px 18px rgba(255,255,255,0.92)',
-                            border: '1px solid rgba(255,255,255,0.8)',
-                        }}
-                    >
-                        <Shield className="w-8 h-8 text-[#4F6BED]" />
+                <div className="text-center mb-8 flex flex-col items-center">
+                    <div className="mb-3">
+                        <CityPulseLogo size="lg" variant="icon" />
                     </div>
                     <h1 className="text-2xl font-bold text-[#1A1D23] tracking-tight">Admin Portal</h1>
-                    <p className="text-sm text-[#7B8494] mt-1">CityPulse AI — Administration</p>
+                    <p className="text-xs text-[#7B8494] mt-1">CityPulse AI — Central Urban Command</p>
                 </div>
 
                 {/* Card */}

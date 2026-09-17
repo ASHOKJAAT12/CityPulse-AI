@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X, ArrowRight, Shield, User, Building2 } from 'lucide-react';
+import { CityPulseLogo } from './CityPulseLogo';
 
 export function Navbar() {
     const pathname = usePathname();
@@ -54,31 +55,8 @@ export function Navbar() {
         >
             <div className="max-w-6xl mx-auto px-6 py-3.5 flex items-center justify-between">
                 {/* ── Brand Logo ──────────────────────────────── */}
-                <Link href="/" className="flex items-center gap-3 group">
-                    <div
-                        className="w-10 h-10 rounded-2xl flex items-center justify-center text-xl transition-all duration-300 group-hover:scale-105"
-                        style={{
-                            background: '#FFFFFF',
-                            boxShadow: '4px 4px 10px rgba(163,177,198,0.45), -4px -4px 10px rgba(255,255,255,0.92)',
-                            border: '1px solid rgba(255,255,255,0.8)',
-                        }}
-                    >
-                        🏙️
-                    </div>
-                    <div>
-                        <div className="text-lg font-bold text-[#1A1D23] tracking-tight flex items-center gap-1.5">
-                            CityPulse AI
-                            <span
-                                className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full text-[#4F6BED]"
-                                style={{
-                                    background: 'rgba(79,107,237,0.1)',
-                                }}
-                            >
-                                Live
-                            </span>
-                        </div>
-                        <p className="text-[11px] text-[#7B8494] hidden sm:block">Cognitive Smart City Platform</p>
-                    </div>
+                <Link href="/" className="group inline-flex items-center">
+                    <CityPulseLogo size="md" showTagline={true} />
                 </Link>
 
                 {/* ── Desktop Navigation Links ─────────────────── */}

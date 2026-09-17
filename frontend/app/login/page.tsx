@@ -5,6 +5,7 @@ import Link from 'next/link';
 import api, { setCitizenAccessToken } from '../../services/api';
 import { useAuthStore, AuthState } from '../../store/useAuthStore';
 import { Navbar } from '@/components/ui/Navbar';
+import { CityPulseLogo } from '@/components/ui/CityPulseLogo';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -58,9 +59,12 @@ export default function LoginPage() {
                     border: '1px solid rgba(255,255,255,0.8)',
                 }}
             >
-                <div className="mb-7 text-center">
+                <div className="mb-7 text-center flex flex-col items-center">
+                    <div className="mb-3">
+                        <CityPulseLogo size="lg" variant="icon" />
+                    </div>
                     <h1 className="text-xl font-bold text-[#1A1D23]">Welcome back</h1>
-                    <p className="text-sm text-[#7B8494] mt-1">Sign in to your citizen account</p>
+                    <p className="text-xs text-[#7B8494] mt-1">Sign in to your CityPulse AI citizen account</p>
                 </div>
 
                 {/* Error */}
