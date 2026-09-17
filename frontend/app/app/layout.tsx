@@ -7,8 +7,80 @@ import { CitySearchBox } from '../../components/ui/CitySearchBox';
 import { NotificationBell } from '../../components/ui/NotificationBell';
 import {
     LogOut, LayoutDashboard, User, Settings as SettingsIcon,
-    Droplet, Zap, Navigation, Battery, Lightbulb, Trash2, Option, Edit3, ClipboardList
+    Droplet, Zap, Navigation, Battery, Lightbulb, Trash2, Edit3, ClipboardList,
 } from 'lucide-react';
+import { cn } from '../../utils/cn';
+
+const navItems = [
+    {
+        section: 'Main',
+        links: [
+            { href: '/app', icon: LayoutDashboard, label: 'Dashboard', exact: true },
+        ],
+    },
+    {
+        section: 'City Services',
+        links: [
+            { href: '/city/water',        icon: Droplet,       label: 'Water System' },
+            { href: '/city/electricity',   icon: Zap,           label: 'Power Grid' },
+            { href: '/city/traffic',       icon: Navigation,    label: 'Traffic Monitor' },
+            { href: '/city/ev',            icon: Battery,       label: 'EV Stations' },
+            { href: '/city/streetlights',  icon: Lightbulb,     label: 'Street Lights' },
+            { href: '/city/garbage',       icon: Trash2,        label: 'Waste Mgmt' },
+        ],
+    },
+    {
+        section: 'Incident Reporting',
+        links: [
+            { href: '/city/report',      icon: Edit3,        label: 'Report Issue', exact: true },
+            { href: '/city/my-reports',  icon: ClipboardList, label: 'My Reports', exact: true },
+        ],
+    },
+    {
+        section: 'Account',
+        links: [
+            { href: '/app/profile',   icon: User,         label: 'Profile', exact: true },
+            { href: '/app/settings',  icon: SettingsIcon, label: 'Settings', exact: true },
+        ],
+    },
+];
+
+function NavLink({ href, icon: Icon, label, exact, pathname }: {
+    href: string;
+    icon: React.ElementType;
+    label: string;
+    exact?: boolean;
+    pathname: string;
+}) {
+    const isActive = exact ? pathname === href : pathname.startsWith(href) && (href !== '/app' || pathname === '/app');
+
+    return (
+        <Link
+            href={href}
+            className={cn(
+                'flex items-center px-3 py-2.5 rounded-xl text-sm font-medium gap-3 transition-all duration-200 group',
+                isActive
+                    ? [
+                        'text-[#4F6BED]',
+                        'shadow-[inset_3px_3px_8px_rgba(163,177,198,0.45),_inset_-3px_-3px_8px_rgba(255,255,255,0.9)]',
+                        'bg-[#F0F2F5]',
+                    ]
+                    : [
+                        'text-[#7B8494]',
+                        'hover:text-[#1A1D23]',
+                        'hover:bg-white',
+                        'hover:shadow-[3px_3px_8px_rgba(163,177,198,0.4),_-3px_-3px_8px_rgba(255,255,255,0.85)]',
+                    ]
+            )}
+        >
+            <Icon className={cn('w-4 h-4 shrink-0 transition-colors', isActive ? 'text-[#4F6BED]' : 'text-[#A8B0C0] group-hover:text-[#7B8494]')} />
+            <span>{label}</span>
+            {isActive && (
+                <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#4F6BED] shrink-0" />
+            )}
+        </Link>
+    );
+}
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
     const { user, isAuthenticated, isLoading, currentCity, checkSession, logout } = useAuthStore();
@@ -26,103 +98,160 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     }, [isLoading, isAuthenticated, router]);
 
     if (isLoading || !isAuthenticated) {
-        return <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-500 font-medium tracking-wide">Loading SmartCity Context...</div>;
+        return (
+            <div
+                className="min-h-screen flex flex-col items-center justify-center gap-4"
+                style={{ backgroundColor: '#F0F2F5' }}
+            >
+                <div
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl"
+                    style={{
+                        background: '#FFFFFF',
+                        boxShadow: '6px 6px 14px rgba(163,177,198,0.55), -6px -6px 14px rgba(255,255,255,0.92)',
+                    }}
+                >
+                    🏙️
+                </div>
+                <p className="text-sm font-medium text-[#7B8494] tracking-wide">
+                    Loading CityPulse AI...
+                </p>
+            </div>
+        );
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 flex font-sans">
-            {/* Sidebar */}
-            <div className="w-64 bg-slate-900 text-white shadow-xl flex flex-col hidden md:flex">
-                <div className="p-6 border-b border-slate-700/50">
-                    <Link href="/app" className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400 tracking-tight flex items-center gap-2">
-                        <span className="text-2xl">🏙️</span> SC 360
+        <div className="min-h-screen flex font-sans" style={{ backgroundColor: '#F0F2F5' }}>
+
+            {/* ── Sidebar ─────────────────────────────────────────── */}
+            <aside
+                className="w-64 hidden md:flex flex-col shrink-0"
+                style={{
+                    background: '#FFFFFF',
+                    boxShadow: '4px 0 12px rgba(163,177,198,0.35)',
+                    borderRight: '1px solid rgba(255,255,255,0.8)',
+                }}
+            >
+                {/* Logo */}
+                <div className="p-5 border-b border-[#F0F2F5]">
+                    <Link href="/app" className="flex items-center gap-2.5 group">
+                        <div
+                            className="w-9 h-9 rounded-xl flex items-center justify-center text-lg shrink-0 transition-all duration-200"
+                            style={{
+                                background: '#F0F2F5',
+                                boxShadow: 'inset 2px 2px 5px rgba(163,177,198,0.4), inset -2px -2px 5px rgba(255,255,255,0.85)',
+                            }}
+                        >
+                            🏙️
+                        </div>
+                        <div>
+                            <div className="text-sm font-bold text-[#1A1D23] tracking-tight leading-none">CityPulse AI</div>
+                            <div className="text-xs text-[#A8B0C0] mt-0.5">Citizen Portal</div>
+                        </div>
                     </Link>
-                    <p className="text-slate-400 text-sm mt-1">Citizen Portal</p>
                 </div>
 
-                <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
-                    <p className="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-2">Main</p>
-                    <Link href="/app" className={`flex items-center px-3 py-2.5 rounded-lg transition-colors ${pathname === '/app' ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'}`}>
-                        <LayoutDashboard className="w-5 h-5 mr-3 opacity-70" /> Dashboard
-                    </Link>
-
-                    <p className="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-6">City Services</p>
-                    <Link href="/city/water" className={`flex items-center px-3 py-2.5 rounded-lg transition-colors ${pathname.includes('/water') ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'}`}>
-                        <Droplet className="w-5 h-5 mr-3 opacity-70" /> Water System
-                    </Link>
-                    <Link href="/city/electricity" className={`flex items-center px-3 py-2.5 rounded-lg transition-colors ${pathname.includes('/electricity') ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'}`}>
-                        <Zap className="w-5 h-5 mr-3 opacity-70" /> Power Grid
-                    </Link>
-                    <Link href="/city/traffic" className={`flex items-center px-3 py-2.5 rounded-lg transition-colors ${pathname.includes('/traffic') ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'}`}>
-                        <Navigation className="w-5 h-5 mr-3 opacity-70" /> Traffic Monitor
-                    </Link>
-                    <Link href="/city/ev" className={`flex items-center px-3 py-2.5 rounded-lg transition-colors ${pathname.includes('/ev') ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'}`}>
-                        <Battery className="w-5 h-5 mr-3 opacity-70" /> EV Stations
-                    </Link>
-                    <Link href="/city/streetlights" className={`flex items-center px-3 py-2.5 rounded-lg transition-colors ${pathname.includes('/streetlights') ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'}`}>
-                        <Lightbulb className="w-5 h-5 mr-3 opacity-70" /> Street Lights
-                    </Link>
-                    <Link href="/city/garbage" className={`flex items-center px-3 py-2.5 rounded-lg transition-colors ${pathname.includes('/garbage') ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'}`}>
-                        <Trash2 className="w-5 h-5 mr-3 opacity-70" /> Waste Mgmt
-                    </Link>
-
-                    <p className="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-6">Incident Reporting</p>
-                    <Link href="/city/report" className={`flex items-center px-3 py-2.5 rounded-lg transition-colors ${pathname === '/city/report' ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'}`}>
-                        <Edit3 className="w-5 h-5 mr-3 opacity-70" /> Report Issue
-                    </Link>
-                    <Link href="/city/my-reports" className={`flex items-center px-3 py-2.5 rounded-lg transition-colors ${pathname === '/city/my-reports' ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'}`}>
-                        <ClipboardList className="w-5 h-5 mr-3 opacity-70" /> My Reports
-                    </Link>
-
-                    <p className="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-6">Account</p>
-                    <Link href="/app/profile" className={`flex items-center px-3 py-2.5 rounded-lg transition-colors ${pathname === '/app/profile' ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'}`}>
-                        <User className="w-5 h-5 mr-3 opacity-70" /> Profile
-                    </Link>
-                    <Link href="/app/settings" className={`flex items-center px-3 py-2.5 rounded-lg transition-colors ${pathname === '/app/settings' ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'}`}>
-                        <SettingsIcon className="w-5 h-5 mr-3 opacity-70" /> Settings
-                    </Link>
+                {/* Navigation */}
+                <nav className="flex-1 py-4 px-3 space-y-5 overflow-y-auto">
+                    {navItems.map(group => (
+                        <div key={group.section}>
+                            <p className="px-3 text-[10px] font-bold text-[#C8D0DF] uppercase tracking-widest mb-1.5">
+                                {group.section}
+                            </p>
+                            <div className="space-y-0.5">
+                                {group.links.map(link => (
+                                    <NavLink key={link.href} pathname={pathname} {...link} />
+                                ))}
+                            </div>
+                        </div>
+                    ))}
                 </nav>
 
-                <div className="p-4 border-t border-slate-700/50 bg-slate-800/30">
-                    <div className="flex items-center mb-4 px-1">
-                        <div className="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-sm uppercase">
+                {/* User Footer */}
+                <div className="p-4 border-t border-[#F0F2F5]">
+                    <div className="flex items-center mb-3 px-1">
+                        <div
+                            className="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-sm uppercase text-[#4F6BED] shrink-0"
+                            style={{
+                                background: '#EEF1FD',
+                                boxShadow: 'inset 2px 2px 5px rgba(163,177,198,0.3), inset -2px -2px 5px rgba(255,255,255,0.9)',
+                            }}
+                        >
                             {user?.name?.[0] || 'C'}
                         </div>
-                        <div className="ml-3 overflow-hidden">
-                            <p className="text-sm font-medium text-white truncate">{user?.name}</p>
-                            <p className="text-xs text-slate-400 truncate">Citizen</p>
+                        <div className="ml-2.5 overflow-hidden">
+                            <p className="text-sm font-semibold text-[#1A1D23] truncate">{user?.name}</p>
+                            <p className="text-xs text-[#A8B0C0] truncate">Citizen</p>
                         </div>
                     </div>
                     <button
                         onClick={() => logout()}
-                        className="w-full flex items-center justify-center px-4 py-2 bg-slate-800 hover:bg-red-500/10 hover:text-red-400 text-slate-300 rounded-lg transition-colors text-sm font-medium"
+                        className={cn(
+                            'w-full flex items-center justify-center px-3 py-2 rounded-xl',
+                            'text-sm font-medium text-[#7B8494] gap-2',
+                            'transition-all duration-200',
+                            'hover:text-red-500 hover:bg-red-50',
+                            'hover:shadow-[3px_3px_8px_rgba(163,177,198,0.4),_-3px_-3px_8px_rgba(255,255,255,0.85)]',
+                            'active:shadow-[inset_2px_2px_5px_rgba(163,177,198,0.4),_inset_-2px_-2px_5px_rgba(255,255,255,0.9)]',
+                        )}
                     >
-                        <LogOut className="w-4 h-4 mr-2" /> Log out
+                        <LogOut className="w-4 h-4" />
+                        <span>Log out</span>
+                    </button>
+                </div>
+            </aside>
+
+            {/* ── Mobile Header ─────────────────────────────────── */}
+            <div
+                className="md:hidden w-full fixed top-0 z-50 flex justify-between items-center px-4 py-3"
+                style={{
+                    background: '#FFFFFF',
+                    boxShadow: '0 2px 10px rgba(163,177,198,0.35)',
+                    borderBottom: '1px solid rgba(255,255,255,0.8)',
+                }}
+            >
+                <Link href="/app" className="flex items-center gap-2">
+                    <span className="text-lg">🏙️</span>
+                    <span className="font-bold text-sm text-[#1A1D23] tracking-tight">CityPulse AI</span>
+                </Link>
+                <div className="flex items-center gap-3">
+                    <NotificationBell token={useAuthStore.getState().accessToken || undefined} />
+                    <button
+                        onClick={() => logout()}
+                        className="p-2 rounded-xl text-[#7B8494] hover:text-red-500 transition-colors"
+                        style={{ background: '#F0F2F5', boxShadow: '2px 2px 5px rgba(163,177,198,0.4), -2px -2px 5px rgba(255,255,255,0.85)' }}
+                    >
+                        <LogOut className="w-4 h-4" />
                     </button>
                 </div>
             </div>
 
-            {/* Mobile Header (Fallback) */}
-            <div className="md:hidden w-full bg-slate-900 text-white p-4 flex justify-between items-center fixed top-0 z-50">
-                <Link href="/app" className="font-bold tracking-tight">SC 360</Link>
-                <div className="flex gap-4">
-                    <NotificationBell token={useAuthStore.getState().accessToken || undefined} />
-                    <button onClick={() => logout()}><LogOut className="w-5 h-5 text-slate-300" /></button>
-                </div>
-            </div>
-
-            {/* Main Content Area */}
+            {/* ── Main Content ──────────────────────────────────── */}
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden md:mt-0 mt-14">
-                <header className="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-8 shadow-sm z-10 hidden md:flex">
-                    <h2 className="text-slate-800 font-semibold flex items-center gap-4">
-                        {currentCity ? <span>📍 {currentCity.name}, {currentCity.state}</span> : 'Global View'}
+
+                {/* Desktop Top Header */}
+                <header
+                    className="hidden md:flex h-16 items-center justify-between px-8 shrink-0"
+                    style={{
+                        background: '#FFFFFF',
+                        boxShadow: '0 2px 10px rgba(163,177,198,0.3)',
+                        borderBottom: '1px solid rgba(255,255,255,0.8)',
+                    }}
+                >
+                    <h2 className="text-sm font-semibold text-[#7B8494] flex items-center gap-2">
+                        {currentCity ? (
+                            <>
+                                <span className="text-base">📍</span>
+                                <span>{currentCity.name}, {currentCity.state}</span>
+                            </>
+                        ) : 'Global View'}
                     </h2>
-                    <div className="flex items-center space-x-6">
+                    <div className="flex items-center gap-4">
                         {currentCity && <CitySearchBox />}
                         <NotificationBell token={useAuthStore.getState().accessToken || undefined} />
                     </div>
                 </header>
 
+                {/* Page Content */}
                 <main className="flex-1 overflow-y-auto p-4 sm:p-8">
                     <div className="max-w-7xl mx-auto">
                         {children}

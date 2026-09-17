@@ -68,18 +68,29 @@ export function NotificationBell({ token, isAdmin = false }: NotificationBellPro
     return (
         <button
             onClick={handleClick}
-            className="relative p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="relative w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200"
+            style={{
+                background: '#F0F2F5',
+                boxShadow: '3px 3px 7px rgba(163,177,198,0.5), -3px -3px 7px rgba(255,255,255,0.9)',
+                border: '1px solid rgba(255,255,255,0.7)',
+            }}
+            title="Notifications"
         >
-            <Bell className="w-6 h-6 text-slate-600 dark:text-slate-300" />
+            <Bell className="w-4 h-4 text-[#7B8494]" />
 
             {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white shadow ring-2 ring-white dark:ring-slate-900">
+                <span
+                    className="absolute -top-1 -right-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                    style={{ background: '#ef4444', boxShadow: '0 1px 4px rgba(239,68,68,0.4)' }}
+                >
                     {unreadCount > 99 ? '99+' : unreadCount}
                 </span>
             )}
 
-            {/* Status Indicator */}
-            <span className={`absolute bottom-1 right-1 h-2 w-2 rounded-full ring-2 ring-white dark:ring-slate-900 ${isConnected ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+            {/* Live connection dot */}
+            <span
+                className={`absolute bottom-1.5 right-1.5 h-1.5 w-1.5 rounded-full ${isConnected ? 'bg-green-500' : 'bg-[#C8D0DF]'}`}
+            />
         </button>
     );
 }

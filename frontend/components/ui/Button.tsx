@@ -15,29 +15,63 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 }
 
 const variantClasses: Record<ButtonVariant, string> = {
-    primary:
-        'bg-primary-600 hover:bg-primary-700 text-white shadow-sm disabled:bg-primary-600/50',
-    secondary:
-        'bg-surface-800 hover:bg-surface-700 text-surface-100 border border-surface-700 disabled:opacity-50',
-    ghost:
-        'hover:bg-surface-800 text-surface-200 disabled:opacity-50',
-    danger:
-        'bg-danger-600 hover:bg-danger-700 text-white shadow-sm disabled:opacity-50',
-    outline:
-        'border border-surface-200 dark:border-surface-700 hover:bg-surface-100 dark:hover:bg-surface-800 text-surface-900 dark:text-surface-100 disabled:opacity-50',
+    primary: [
+        'bg-white text-[#4F6BED] font-semibold',
+        'shadow-[6px_6px_14px_rgba(163,177,198,0.55),_-6px_-6px_14px_rgba(255,255,255,0.92)]',
+        'hover:shadow-[8px_8px_18px_rgba(163,177,198,0.55),_-8px_-8px_18px_rgba(255,255,255,0.92)] hover:-translate-y-px',
+        'active:shadow-[inset_4px_4px_10px_rgba(163,177,198,0.5),_inset_-4px_-4px_10px_rgba(255,255,255,0.9)] active:translate-y-0',
+        'disabled:opacity-50 disabled:shadow-[3px_3px_8px_rgba(163,177,198,0.4),_-3px_-3px_8px_rgba(255,255,255,0.85)] disabled:translate-y-0',
+        'border border-white/80',
+    ].join(' '),
+
+    secondary: [
+        'bg-white text-[#1A1D23] font-medium',
+        'shadow-[6px_6px_14px_rgba(163,177,198,0.55),_-6px_-6px_14px_rgba(255,255,255,0.92)]',
+        'hover:shadow-[8px_8px_18px_rgba(163,177,198,0.55),_-8px_-8px_18px_rgba(255,255,255,0.92)] hover:-translate-y-px',
+        'active:shadow-[inset_4px_4px_10px_rgba(163,177,198,0.5),_inset_-4px_-4px_10px_rgba(255,255,255,0.9)] active:translate-y-0',
+        'disabled:opacity-50',
+        'border border-white/80',
+    ].join(' '),
+
+    ghost: [
+        'bg-transparent text-[#7B8494] font-medium',
+        'shadow-none border border-transparent',
+        'hover:bg-white hover:text-[#1A1D23]',
+        'hover:shadow-[3px_3px_8px_rgba(163,177,198,0.55),_-3px_-3px_8px_rgba(255,255,255,0.92)]',
+        'active:shadow-[inset_2px_2px_6px_rgba(163,177,198,0.45),_inset_-2px_-2px_6px_rgba(255,255,255,0.9)]',
+        'disabled:opacity-50',
+    ].join(' '),
+
+    danger: [
+        'bg-white text-red-500 font-semibold',
+        'shadow-[6px_6px_14px_rgba(163,177,198,0.55),_-6px_-6px_14px_rgba(255,255,255,0.92)]',
+        'hover:shadow-[8px_8px_18px_rgba(163,177,198,0.55),_-8px_-8px_18px_rgba(255,255,255,0.92)] hover:-translate-y-px',
+        'active:shadow-[inset_4px_4px_10px_rgba(163,177,198,0.5),_inset_-4px_-4px_10px_rgba(255,255,255,0.9)] active:translate-y-0',
+        'disabled:opacity-50',
+        'border border-white/80',
+    ].join(' '),
+
+    outline: [
+        'bg-white text-[#7B8494] font-medium',
+        'shadow-[3px_3px_8px_rgba(163,177,198,0.4),_-3px_-3px_8px_rgba(255,255,255,0.85)]',
+        'hover:text-[#1A1D23] hover:shadow-[6px_6px_14px_rgba(163,177,198,0.55),_-6px_-6px_14px_rgba(255,255,255,0.92)] hover:-translate-y-px',
+        'active:shadow-[inset_3px_3px_8px_rgba(163,177,198,0.45),_inset_-3px_-3px_8px_rgba(255,255,255,0.9)] active:translate-y-0',
+        'disabled:opacity-50',
+        'border border-white/70',
+    ].join(' '),
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
-    xs: 'px-2.5 py-1 text-xs gap-1',
-    sm: 'px-3 py-1.5 text-sm gap-1.5',
-    md: 'px-4 py-2 text-sm gap-2',
-    lg: 'px-6 py-3 text-base gap-2',
+    xs: 'px-3 py-1.5 text-xs gap-1 rounded-lg',
+    sm: 'px-4 py-2 text-sm gap-1.5 rounded-xl',
+    md: 'px-5 py-2.5 text-sm gap-2 rounded-xl',
+    lg: 'px-7 py-3 text-base gap-2.5 rounded-2xl',
 };
 
 const Spinner = ({ size }: { size: ButtonSize }) => (
     <svg
         className={cn(
-            'animate-spin',
+            'animate-spin shrink-0',
             size === 'xs' ? 'w-3 h-3' : size === 'sm' ? 'w-3.5 h-3.5' : 'w-4 h-4'
         )}
         fill="none"
@@ -72,9 +106,10 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                 ref={ref}
                 disabled={disabled ?? isLoading}
                 className={cn(
-                    'inline-flex items-center justify-center font-medium rounded-lg',
-                    'transition-colors duration-150 focus-ring',
-                    'disabled:cursor-not-allowed',
+                    'inline-flex items-center justify-center font-medium',
+                    'transition-all duration-200 ease-out',
+                    'focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4F6BED]/30 focus-visible:ring-offset-2 focus-visible:ring-offset-[#F0F2F5]',
+                    'disabled:cursor-not-allowed select-none',
                     variantClasses[variant],
                     sizeClasses[size],
                     className
