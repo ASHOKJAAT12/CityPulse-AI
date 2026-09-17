@@ -3,18 +3,30 @@ import { useState } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
 import { Shield, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { Navbar } from '@/components/ui/Navbar';
 
-export default function LoginPage() {
+const inputStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '0.75rem 0.875rem',
+    borderRadius: '0.75rem',
+    background: '#F0F2F5',
+    color: '#1A1D23',
+    boxShadow: 'inset 2px 2px 6px rgba(163,177,198,0.45), inset -2px -2px 6px rgba(255,255,255,0.9)',
+    border: '1px solid rgba(255,255,255,0.7)',
+    fontSize: '0.875rem',
+    fontFamily: 'inherit',
+    outline: 'none',
+};
+
+export default function AdminLoginPage() {
     const { login } = useAuth();
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
 
-    const [form, setForm] = useState({
-        email: '',
-        password: ''
-    });
+    const [form, setForm] = useState({ email: '', password: '' });
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -32,43 +44,78 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-            <div className="w-full max-w-md">
-                <div className="text-center mb-8">
-                    <div className="mx-auto w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30 mb-4 transform -rotate-6 hover:rotate-0 transition-transform duration-300">
-                        <Shield className="w-8 h-8 text-white" />
+        <div
+            className="min-h-screen flex flex-col"
+            style={{ backgroundColor: '#F0F2F5' }}
+        >
+            <Navbar />
+
+            <div className="flex-1 flex flex-col items-center justify-center p-6 py-10">
+            <div className="w-full max-w-sm">
+
+                {/* Logo / Brand */}
+                <div className="text-center mb-10">
+                    <div
+                        className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center mb-5 transition-transform duration-300 hover:scale-105"
+                        style={{
+                            background: '#FFFFFF',
+                            boxShadow: '8px 8px 18px rgba(163,177,198,0.55), -8px -8px 18px rgba(255,255,255,0.92)',
+                            border: '1px solid rgba(255,255,255,0.8)',
+                        }}
+                    >
+                        <Shield className="w-8 h-8 text-[#4F6BED]" />
                     </div>
-                    <h1 className="text-3xl font-bold text-slate-900 tracking-tight">SmartCity 360</h1>
-                    <p className="text-slate-500 mt-2 font-medium">Administrator Portal</p>
+                    <h1 className="text-2xl font-bold text-[#1A1D23] tracking-tight">Admin Portal</h1>
+                    <p className="text-sm text-[#7B8494] mt-1">CityPulse AI — Administration</p>
                 </div>
 
-                <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-8 border border-slate-100">
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Card */}
+                <div
+                    className="rounded-3xl p-8"
+                    style={{
+                        background: '#FFFFFF',
+                        boxShadow: '10px 10px 24px rgba(163,177,198,0.5), -10px -10px 24px rgba(255,255,255,0.92)',
+                        border: '1px solid rgba(255,255,255,0.8)',
+                    }}
+                >
+                    <form onSubmit={handleSubmit} className="space-y-5">
                         {error && (
-                            <div className="bg-red-50 text-red-600 text-sm p-4 rounded-xl font-medium border border-red-100 flex items-start">
-                                <span className="block">{error}</span>
+                            <div
+                                className="px-4 py-3 rounded-xl text-sm text-red-600 font-medium"
+                                style={{
+                                    background: 'rgba(239,68,68,0.07)',
+                                    border: '1px solid rgba(239,68,68,0.15)',
+                                }}
+                            >
+                                ⚠ {error}
                             </div>
                         )}
 
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">Email Address</label>
+                        {/* Email */}
+                        <div className="space-y-1.5">
+                            <label className="block text-sm font-medium text-[#1A1D23]">
+                                Email Address
+                            </label>
                             <input
                                 type="email"
                                 required
-                                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none text-slate-700 bg-slate-50/50 focus:bg-white"
+                                style={inputStyle}
                                 placeholder="admin@smartcity.com"
                                 value={form.email}
                                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                             />
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-2">Password</label>
+                        {/* Password */}
+                        <div className="space-y-1.5">
+                            <label className="block text-sm font-medium text-[#1A1D23]">
+                                Password
+                            </label>
                             <div className="relative">
                                 <input
                                     type={showPassword ? 'text' : 'password'}
                                     required
-                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none text-slate-700 bg-slate-50/50 focus:bg-white pr-12"
+                                    style={{ ...inputStyle, paddingRight: '3rem' }}
                                     placeholder="••••••••"
                                     value={form.password}
                                     onChange={(e) => setForm({ ...form, password: e.target.value })}
@@ -76,31 +123,48 @@ export default function LoginPage() {
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#A8B0C0] hover:text-[#7B8494] transition-colors"
                                 >
-                                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                 </button>
                             </div>
                         </div>
 
+                        {/* Submit */}
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3.5 rounded-xl shadow-lg shadow-blue-500/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
+                            className="w-full py-3 rounded-2xl text-sm font-semibold text-[#4F6BED] transition-all duration-200 mt-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            style={{
+                                background: '#FFFFFF',
+                                boxShadow: loading
+                                    ? 'inset 4px 4px 10px rgba(163,177,198,0.5), inset -4px -4px 10px rgba(255,255,255,0.9)'
+                                    : '6px 6px 14px rgba(163,177,198,0.55), -6px -6px 14px rgba(255,255,255,0.92)',
+                                border: '1px solid rgba(255,255,255,0.8)',
+                            }}
                         >
                             {loading ? (
                                 <>
-                                    <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                                    <Loader2 className="w-4 h-4 animate-spin" />
                                     Authenticating...
                                 </>
-                            ) : 'Sign In to Dashboard'}
+                            ) : (
+                                'Sign In to Dashboard'
+                            )}
                         </button>
                     </form>
                 </div>
 
-                <p className="text-center text-slate-400 text-sm mt-8">
+                <p className="text-center text-xs text-[#C8D0DF] mt-8">
                     Strictly authorized personnel only. All access is auditable.
                 </p>
+                <p className="text-center text-xs text-[#A8B0C0] mt-2">
+                    Citizen?{' '}
+                    <Link href="/login" className="text-[#4F6BED] hover:underline">
+                        Login here →
+                    </Link>
+                </p>
+            </div>
             </div>
         </div>
     );

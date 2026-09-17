@@ -19,9 +19,9 @@ export interface CardHeaderProps {
 
 const paddingClasses = {
     none: '',
-    sm: 'p-4',
-    md: 'p-5',
-    lg: 'p-6',
+    sm:   'p-4',
+    md:   'p-5',
+    lg:   'p-6',
 };
 
 export function Card({ className, children, padding = 'md', hoverable = false }: CardProps) {
@@ -30,7 +30,10 @@ export function Card({ className, children, padding = 'md', hoverable = false }:
             className={cn(
                 'card',
                 paddingClasses[padding],
-                hoverable && 'hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-150 cursor-pointer',
+                hoverable && [
+                    'cursor-pointer transition-all duration-200',
+                    'hover:shadow-[8px_8px_18px_rgba(163,177,198,0.55),_-8px_-8px_18px_rgba(255,255,255,0.92)] hover:-translate-y-0.5',
+                ],
                 className
             )}
         >
@@ -43,9 +46,9 @@ export function CardHeader({ title, subtitle, actions, className }: CardHeaderPr
     return (
         <div className={cn('flex items-start justify-between gap-4 mb-4', className)}>
             <div>
-                <h3 className="text-sm font-semibold text-surface-900 dark:text-surface-100">{title}</h3>
+                <h3 className="text-sm font-semibold text-[#1A1D23]">{title}</h3>
                 {subtitle && (
-                    <p className="text-xs text-surface-500 dark:text-surface-400 mt-0.5">{subtitle}</p>
+                    <p className="text-xs text-[#7B8494] mt-0.5">{subtitle}</p>
                 )}
             </div>
             {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}

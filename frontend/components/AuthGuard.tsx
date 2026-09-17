@@ -11,16 +11,16 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
 
-    const isLoginPage = pathname === '/admin/login';
+    const isAuthPage = pathname === '/admin/login' || pathname === '/admin/register';
 
     useEffect(() => {
-        if (!loading && !user && !isLoginPage) {
+        if (!loading && !user && !isAuthPage) {
             router.push('/admin/login');
         }
-        if (!loading && user && isLoginPage) {
+        if (!loading && user && isAuthPage) {
             router.push('/admin');
         }
-    }, [user, loading, isLoginPage, router]);
+    }, [user, loading, isAuthPage, router]);
 
     if (loading) {
         return (
@@ -34,7 +34,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
         return <>{children}</>;
     }
 
-    if (isLoginPage) return <>{children}</>;
+    if (isAuthPage) return <>{children}</>;
 
     return (
         <div className="min-h-screen bg-slate-50 flex">
