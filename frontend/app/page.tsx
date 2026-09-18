@@ -28,6 +28,7 @@ import {
     ChevronRight,
 } from 'lucide-react';
 import { Navbar } from '@/components/ui/Navbar';
+import { CityPulseLogo } from '@/components/ui/CityPulseLogo';
 
 export default function HomePage() {
     // User benefit perspective toggle: 'citizens' | 'municipalities'
@@ -711,19 +712,9 @@ export default function HomePage() {
             {/* ── Footer ───────────────────────────────────────────── */}
             <footer className="w-full border-t border-[#E2E8F0] mt-12 py-10">
                 <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-6">
-                    <div className="flex items-center gap-3">
-                        <div
-                            className="w-8 h-8 rounded-xl flex items-center justify-center text-base"
-                            style={{
-                                background: '#FFFFFF',
-                                boxShadow: '3px 3px 8px rgba(163,177,198,0.4), -3px -3px 8px rgba(255,255,255,0.9)',
-                            }}
-                        >
-                            🏙️
-                        </div>
-                        <span className="text-sm font-bold text-[#1A1D23]">CityPulse AI</span>
-                        <span className="text-xs text-[#A8B0C0]">| SmartCity 360 Urban Platform</span>
-                    </div>
+                    <Link href="/" className="inline-flex items-center">
+                        <CityPulseLogo size="sm" variant="full" />
+                    </Link>
 
                     <div className="flex items-center gap-6 text-xs text-[#7B8494]">
                         <Link href="/login" className="hover:text-[#4F6BED] transition-colors">

@@ -41,9 +41,19 @@ export function createApp(): Application {
     app.use(
         cors({
             origin: (origin, callback) => {
-                // Allow same-origin requests and the configured frontend URL
-                const allowedOrigins = [env.FRONTEND_URL];
-                if (!origin || allowedOrigins.includes(origin)) {
+                // Allow same-origin requests and configured or local dev frontend URLs
+                const allowedOrigins = [
+                    env.FRONTEND_URL,
+                    'http://localhost:3000',
+                    'http://127.0.0.1:3000',
+                    'http://localhost:3001',
+                    'http://127.0.0.1:3001',
+                ];
+                if (
+                    !origin ||
+                    allowedOrigins.includes(origin) ||
+                    (!isProduction && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin))
+                ) {
                     callback(null, true);
                 } else {
                     callback(new Error(`CORS: origin '${origin}' not allowed`));
