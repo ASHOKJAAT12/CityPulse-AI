@@ -1,24 +1,19 @@
+require('dotenv').config();
 const mongoose = require('mongoose');
-require('dotenv').config({ path: './.env' });
-const { User, City } = require('./dist/models');
 
-async function testUsers() {
-    try {
-        await mongoose.connect(process.env.MONGODB_URI, { dbName: process.env.MONGODB_DB_NAME });
-        console.log("Connected to MongoDB.");
+async function test() {
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017', { dbName: process.env.MONGODB_DB_NAME || 'citypulse' });
+    const PowerOutage = mongoose.models.PowerOutage || mongoose.model('PowerOutage', new mongoose.Schema({}, { strict: false }));
+    const ElectricityMaintenance = mongoose.models.ElectricityMaintenance || mongoose.model('ElectricityMaintenance', new mongoose.Schema({}, { strict: false }));
 
-        const cityAdmins = await User.find({ role: 'CITY_ADMIN' });
-        console.log("Found", cityAdmins.length, "CITY_ADMINs");
-        for (const admin of cityAdmins) {
-            console.log("Email:", admin.email, "CityId:", admin.cityId);
-            if (!admin.cityId) {
-                console.log("WARNING: CITY_ADMIN with missing cityId!");
-            }
-        }
-    } catch (err) {
-        console.error("Failed:", err.message);
-    } finally {
-        await mongoose.disconnect();
-    }
+    const outages = await PowerOutage.find({});
+    console.log("ALL OUTAGES IN DB:");
+    console.log(JSON.stringify(outages, null, 2));
+
+    const maintenance = await ElectricityMaintenance.find({});
+    console.log("\nALL MAINTENANCE IN DB:");
+    console.log(JSON.stringify(maintenance, null, 2));
+
+    process.exit(0);
 }
-testUsers();
+test().catch(e => { console.error(e); process.exit(1); });
