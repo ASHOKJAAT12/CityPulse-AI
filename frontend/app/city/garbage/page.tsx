@@ -5,17 +5,21 @@ import dynamic from 'next/dynamic';
 import { garbageService } from '@/services/garbage.service';
 import trackingSocket from '@/services/trackingSocket';
 import { useTrackingStore } from '@/store/useTrackingStore';
-import type { LiveVehiclePublic, GarbageRoute, VehicleLocationUpdatedPayload, VehicleStatusUpdatedPayload } from '@/types/garbage.types';
+import type { LiveVehiclePublic, GarbageRoute, GarbageRouteStop, VehicleLocationUpdatedPayload, VehicleStatusUpdatedPayload } from '@/types/garbage.types';
+import type { LatLng } from '@/types';
 
 // Dynamic import to avoid SSR issues with Leaflet
-const MapContainer = dynamic(() => import('react-leaflet').then(m => m.MapContainer), { ssr: false });
-const TileLayer = dynamic(() => import('react-leaflet').then(m => m.TileLayer), { ssr: false });
+const MapView = dynamic(() => import('@/components/map').then(m => m.MapView), { ssr: false, loading: () => <div className="h-full bg-slate-100 flex items-center justify-center animate-pulse">Loading map...</div> });
 const LiveVehicleLayerDyn = dynamic(() => import('@/components/map/LiveVehicleLayer').then(m => m.LiveVehicleLayer), { ssr: false });
+const Marker = dynamic(() => import('@/components/map').then(mod => mod.Marker), { ssr: false });
+const RoutePath = dynamic(() => import('@/components/map').then(mod => mod.Route), { ssr: false });
+const Popup = dynamic(() => import('@/components/map').then(mod => mod.Popup), { ssr: false });
 
 export default function CitizenGarbagePage() {
     const [routes, setRoutes] = useState<GarbageRoute[]>([]);
     const [selectedRouteId, setSelectedRouteId] = useState<string | null>(null);
     const [routeLiveData, setRouteLiveData] = useState<any>(null);
+    const [routeStops, setRouteStops] = useState<GarbageRouteStop[]>([]);
     const [liveVehicles, setLiveVehicles] = useState<LiveVehiclePublic[]>([]);
     const [loading, setLoading] = useState(true);
     const [cityId, setCityId] = useState<string | null>(null);
@@ -40,6 +44,7 @@ export default function CitizenGarbagePage() {
     useEffect(() => {
         if (selectedRouteId) {
             loadRouteLive(selectedRouteId);
+            loadRouteStops(selectedRouteId);
         }
     }, [selectedRouteId]);
 
@@ -47,7 +52,7 @@ export default function CitizenGarbagePage() {
         try {
             setLoading(true);
             // Citizen: routes from city context (cityId from user session)
-            const routeRes = await garbageService.getRoutes({ status: 'ACTIVE' });
+            const routeRes = await garbageService.getPublicRoutes({ status: 'ACTIVE' });
             const routeList: GarbageRoute[] = routeRes?.data ?? [];
             setRoutes(routeList);
 
@@ -91,9 +96,23 @@ export default function CitizenGarbagePage() {
         }
     }
 
+    async function loadRouteStops(routeId: string) {
+        try {
+            const res = await garbageService.getPublicRouteStops(routeId);
+            setRouteStops(res?.data ?? []);
+        } catch (e) {
+            console.error('Failed to load route stops', e);
+            setRouteStops([]);
+        }
+    }
+
     const selectedRoute = routes.find(r => r._id === selectedRouteId);
+    // Derived Polyline data
     const progress = routeLiveData?.progress;
     const activeVehicle = routeLiveData?.vehicle;
+    const sortedStops = [...routeStops].sort((a, b) => a.sequence - b.sequence);
+    const routePoints: LatLng[] = sortedStops.map(s => ({ lat: s.location.coordinates[1], lng: s.location.coordinates[0] }));
+    const mapCenter = { lat: 24.5854, lng: 73.7125 };
 
     return (
         <div style={{ fontFamily: 'Inter, sans-serif' }}>
@@ -200,36 +219,37 @@ export default function CitizenGarbagePage() {
 
                 {/* Map */}
                 <div style={{ flex: 1, position: 'relative' }}>
-                    {typeof window !== 'undefined' && (
-                        <MapContainer
-                            center={[22.5726, 88.3639]} // Default India center
-                            zoom={13}
-                            style={{ height: '100%', width: '100%' }}
-                        >
-                            <TileLayer
-                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                                attribution='&copy; OpenStreetMap contributors'
-                            />
-                            <LiveVehicleLayerDyn mode="citizen" />
-                        </MapContainer>
-                    )}
+                    <MapView
+                        center={mapCenter}
+                        zoom={13}
+                        className="w-full h-full absolute inset-0"
+                    >
+                        {/* Draw Route Line */}
+                        {routePoints.length > 1 && (
+                            <RoutePath points={routePoints} color="#4b5563" weight={4} dashed={false} />
+                        )}
 
-                    {/* No vehicles overlay */}
-                    {!loading && liveVehicles.length === 0 && (
-                        <div style={{
-                            position: 'absolute', top: '50%', left: '50%',
-                            transform: 'translate(-50%, -50%)',
-                            background: 'rgba(255,255,255,0.95)', borderRadius: 12,
-                            padding: '20px 32px', textAlign: 'center', zIndex: 1000,
-                            boxShadow: '0 4px 24px rgba(0,0,0,0.15)',
-                        }}>
-                            <div style={{ fontSize: 40, marginBottom: 8 }}>🚛</div>
-                            <div style={{ fontWeight: 600, fontSize: 15 }}>No vehicles currently tracking</div>
-                            <div style={{ color: '#6b7280', fontSize: 13, marginTop: 4 }}>
-                                Check back during collection hours
-                            </div>
-                        </div>
-                    )}
+                        {/* Draw Stops */}
+                        {sortedStops.map((stop, i) => (
+                            <Marker
+                                key={stop._id}
+                                position={{ lat: stop.location.coordinates[1], lng: stop.location.coordinates[0] }}
+                                label={stop.name}
+                                icon={i === 0 ? 'start' : i === sortedStops.length - 1 ? 'end' : 'stop'}
+                                popup={
+                                    <Popup>
+                                        <div className="p-1">
+                                            <strong>Sequence: {stop.sequence}</strong><br />
+                                            {stop.name}<br />
+                                            {stop.scheduledArrival ? `Arrival: ${stop.scheduledArrival}` : ''}
+                                        </div>
+                                    </Popup>
+                                }
+                            />
+                        ))}
+
+                        <LiveVehicleLayerDyn mode="citizen" />
+                    </MapView>
                 </div>
             </div>
         </div>

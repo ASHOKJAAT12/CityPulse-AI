@@ -9,6 +9,32 @@ import { RouteProgressService } from '../services/garbage/RouteProgressService';
 import { TrackingSession } from '../models/TrackingSession';
 import mongoose from 'mongoose';
 
+import { GarbageRouteStop } from '../models/GarbageRouteStop';
+
+/**
+ * GET /api/v1/garbage/public/routes
+ *
+ * Returns active routes.
+ */
+export async function getRoutes(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+        const { status, cityId } = req.query;
+        const query: any = {};
+
+        if (status) query.status = status;
+        if (cityId) query.cityId = cityId;
+
+        const routes = await GarbageRoute.find(query)
+            .select('-routeGeometry -driverId') // omit private info like driver
+            .populate('vehicleId', 'vehicleNumber vehicleType trackingStatus')
+            .lean();
+
+        sendSuccess(res, routes, 'Public routes retrieved');
+    } catch (e) {
+        next(e);
+    }
+}
+
 /**
  * GET /api/v1/garbage/public/live?cityId=<id>
  *
@@ -117,6 +143,25 @@ export async function getRouteLive(req: Request, res: Response, next: NextFuncti
         };
 
         sendSuccess(res, publicResponse, 'Route live data retrieved');
+    } catch (e) {
+        next(e);
+    }
+}
+
+/**
+ * GET /api/v1/garbage/public/routes/:routeId/stops
+ *
+ * Returns stops for a given active route for public viewing.
+ */
+export async function getStops(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+        const { routeId } = req.params;
+        const stops = await GarbageRouteStop.find({ routeId })
+            .select('name sequence location scheduledArrival')
+            .sort({ sequence: 1 })
+            .lean();
+
+        sendSuccess(res, stops, 'Public route stops retrieved');
     } catch (e) {
         next(e);
     }

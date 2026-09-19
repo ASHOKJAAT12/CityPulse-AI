@@ -25,10 +25,10 @@ router.use('/citizen', citizenProfileRoutes);
 router.use('/cities', citiesRoutes);
 router.use('/admin', adminRoutes);
 router.use('/city-admins', cityAdminsRoutes);
-router.use('/garbage', garbageRoutes);
 // Phase 5 — Live Tracking
-router.use('/garbage', trackingRoutes);
 router.use('/garbage/public', publicGarbageRoutes);
+router.use('/garbage', garbageRoutes);
+router.use('/garbage', trackingRoutes);
 
 // Phase 6 - Water Management
 import waterRoutes from './water.routes';

@@ -62,11 +62,31 @@ export async function authenticate(req: Request, _res: Response, next: NextFunct
             return;
         }
 
+        let cityIdStr = user.cityId ? user.cityId.toString() : null;
+
+        if (!cityIdStr && user.role === 'SUPER_ADMIN') {
+            const reqCity = req.body?.cityId || req.query?.cityId || req.params?.cityId;
+            if (reqCity) {
+                cityIdStr = reqCity.toString();
+            } else {
+                try {
+                    const mongoose = require('mongoose');
+                    const cityModel = mongoose.models.City || mongoose.model('City');
+                    const defaultCity = await cityModel.findOne({ status: 'ACTIVE' });
+                    if (defaultCity) {
+                        cityIdStr = defaultCity._id.toString();
+                    }
+                } catch (e) {
+                    // Ignore
+                }
+            }
+        }
+
         req.user = {
             id: user.id,
             email: user.email,
             role: user.role,
-            cityId: user.cityId ? user.cityId.toString() : null,
+            cityId: cityIdStr,
             isActive: true
         };
         next();

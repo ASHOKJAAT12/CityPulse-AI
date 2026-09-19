@@ -18,17 +18,20 @@ import type { LatLng } from '@/types';
 // Fix Leaflet's default icon path issues with Next.js
 import L from 'leaflet';
 
-const DefaultIcon = L.icon({
-    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-});
+let DefaultIcon: any = null;
 
-L.Marker.prototype.options.icon = DefaultIcon;
+if (typeof window !== 'undefined') {
+    DefaultIcon = L.icon({
+        iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
+    L.Marker.prototype.options.icon = DefaultIcon;
+}
 
 // ── Types ──────────────────────────────────────────────────────
 
@@ -42,7 +45,7 @@ export interface MapViewProps {
 export interface MarkerProps {
     position: LatLng;
     label?: string;
-    icon?: 'default' | 'garbage' | 'ev' | 'alert' | 'city';
+    icon?: 'default' | 'garbage' | 'ev' | 'alert' | 'city' | 'stop' | 'start' | 'end';
     color?: string;
     popup?: React.ReactNode;
     onClick?: () => void;
@@ -116,9 +119,31 @@ export function MapView({
 
 // ── Marker ────────────────────────────────────────────────────
 
-export function Marker({ position, label, popup, onClick, color }: MarkerProps) {
-    const markerIcon = color
-        ? L.divIcon({
+export function Marker({ position, label, popup, onClick, color, icon = 'default' }: MarkerProps) {
+    let markerIcon = null;
+
+    if (icon === 'stop') {
+        markerIcon = L.divIcon({
+            className: '',
+            html: `<div style="width:10px;height:10px;border-radius:50%;background:white;border:2.5px solid black;box-shadow:0 1px 3px rgba(0,0,0,0.4); transform: translate(-50%, -50%);"></div>`,
+            iconSize: [10, 10],
+            iconAnchor: [5, 5],
+            popupAnchor: [0, -5],
+        });
+    } else if (icon === 'start') {
+        markerIcon = L.divIcon({
+            className: '',
+            html: `<div style="background:black;color:white;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:700;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.3);">Start</div>`,
+            iconAnchor: [20, 12],
+        });
+    } else if (icon === 'end') {
+        markerIcon = L.divIcon({
+            className: '',
+            html: `<div style="background:black;color:white;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:700;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.3);">End</div>`,
+            iconAnchor: [16, 12],
+        });
+    } else if (color) {
+        markerIcon = L.divIcon({
             className: '',
             html: `<div style="
                   width:16px;height:16px;border-radius:50%;
@@ -129,8 +154,10 @@ export function Marker({ position, label, popup, onClick, color }: MarkerProps) 
             iconSize: [16, 16],
             iconAnchor: [8, 8],
             popupAnchor: [0, -10],
-        })
-        : DefaultIcon;
+        });
+    } else {
+        markerIcon = DefaultIcon;
+    }
 
     return (
         <LeafletMarker

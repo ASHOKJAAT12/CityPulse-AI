@@ -94,6 +94,14 @@ export const garbageService = {
     },
 
     // --- PUBLIC (no auth) ---
+    getPublicRoutes: async (params?: Record<string, any>) => {
+        const response = await api.get<any>('/garbage/public/routes', { params });
+        return response.data as any;
+    },
+    getPublicRouteStops: async (routeId: string) => {
+        const response = await api.get<any>(`/garbage/public/routes/${routeId}/stops`);
+        return response.data as any;
+    },
     getLiveVehicles: async (cityId: string) => {
         const response = await api.get<any>('/garbage/public/live', { params: { cityId } });
         return response.data as any;

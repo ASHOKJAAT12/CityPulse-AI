@@ -190,7 +190,7 @@ export default function OptimizationDashboard() {
                                                     <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusTheme(rec.status)} uppercase tracking-wider`}>
                                                         {rec.status}
                                                     </span>
-                                                    <span className="text-slate-500 text-xs font-mono">{rec.service} // {rec.optimizationType}</span>
+                                                    <span className="text-slate-500 text-xs font-mono">{rec.service} {"//"} {rec.optimizationType}</span>
                                                     <span className="text-slate-600 text-xs font-mono">conf: {rec.confidence}%</span>
                                                 </div>
                                                 <h3 className="text-lg font-bold text-slate-100 mb-1">{rec.title}</h3>

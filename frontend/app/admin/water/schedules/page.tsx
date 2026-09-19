@@ -1,20 +1,62 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Calendar, Plus, MapPin } from 'lucide-react';
+import { Calendar, Plus, MapPin, X } from 'lucide-react';
 import api from '../../../../services/api';
 
 export default function WaterSchedulesPage() {
     const [schedules, setSchedules] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
+    const [showModal, setShowModal] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const [formData, setFormData] = useState({
+        areaName: '',
+        dayOfWeek: 0,
+        startTime: '',
+        endTime: '',
+        notes: '',
+        everyDay: false
+    });
+
     const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-    useEffect(() => {
-        api.get('/admin/water/schedules')
+    const fetchSchedules = () => {
+        setLoading(true);
+        api.get('/water/schedules')
             .then((res: any) => setSchedules(res.data.data))
             .catch((err: any) => console.error(err))
             .finally(() => setLoading(false));
+    };
+
+    useEffect(() => {
+        fetchSchedules();
     }, []);
+
+    const handleCreate = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            setSubmitting(true);
+            const { everyDay, dayOfWeek, ...rest } = formData;
+
+            if (everyDay) {
+                const promises = dayNames.map((_, i) =>
+                    api.post('/water/schedules', { ...rest, dayOfWeek: i })
+                );
+                await Promise.all(promises);
+            } else {
+                await api.post('/water/schedules', { ...rest, dayOfWeek: Number(dayOfWeek) });
+            }
+
+            setShowModal(false);
+            setFormData({ areaName: '', dayOfWeek: 0, startTime: '', endTime: '', notes: '', everyDay: false });
+            fetchSchedules();
+        } catch (e) {
+            console.error('Failed to create schedule', e);
+            alert('Failed to create schedule');
+        } finally {
+            setSubmitting(false);
+        }
+    };
 
     if (loading) {
         return <div className="p-8 text-center text-slate-500 font-medium">Loading supply schedules...</div>;
@@ -27,7 +69,10 @@ export default function WaterSchedulesPage() {
                     <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Supply Schedules</h1>
                     <p className="text-slate-500 mt-1">Manage public water provisioning times across city zones.</p>
                 </div>
-                <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors flex items-center gap-2">
+                <button
+                    onClick={() => setShowModal(true)}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors flex items-center gap-2"
+                >
                     <Plus className="w-5 h-5" />
                     New Schedule
                 </button>
@@ -83,6 +128,115 @@ export default function WaterSchedulesPage() {
                     ))
                 )}
             </div>
+
+            {/* Create Schedule Modal */}
+            {showModal && (
+                <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
+                        <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                            <h2 className="text-xl font-bold text-slate-800">New Supply Schedule</h2>
+                            <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                                <X className="w-6 h-6" />
+                            </button>
+                        </div>
+
+                        <div className="p-5 overflow-y-auto">
+                            <form id="schedule-form" onSubmit={handleCreate} className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-1">Area Name</label>
+                                    <input
+                                        required
+                                        type="text"
+                                        value={formData.areaName}
+                                        onChange={e => setFormData({ ...formData, areaName: e.target.value })}
+                                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                        placeholder="e.g. North Zone, Sector 4"
+                                    />
+                                </div>
+
+                                <div className="p-3 bg-slate-50 border border-slate-100 rounded-xl flex items-center gap-3">
+                                    <input
+                                        type="checkbox"
+                                        id="everyDay"
+                                        checked={formData.everyDay}
+                                        onChange={e => setFormData({ ...formData, everyDay: e.target.checked })}
+                                        className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500"
+                                    />
+                                    <label htmlFor="everyDay" className="text-sm font-bold text-slate-700 cursor-pointer">
+                                        Repeat Every Day
+                                    </label>
+                                </div>
+
+                                {!formData.everyDay && (
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-700 mb-1">Day of Week</label>
+                                        <select
+                                            value={formData.dayOfWeek}
+                                            onChange={e => setFormData({ ...formData, dayOfWeek: Number(e.target.value) })}
+                                            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                        >
+                                            {dayNames.map((name, i) => (
+                                                <option key={i} value={i}>{name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-700 mb-1">Start Time</label>
+                                        <input
+                                            required
+                                            type="time"
+                                            value={formData.startTime}
+                                            onChange={e => setFormData({ ...formData, startTime: e.target.value })}
+                                            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-700 mb-1">End Time</label>
+                                        <input
+                                            required
+                                            type="time"
+                                            value={formData.endTime}
+                                            onChange={e => setFormData({ ...formData, endTime: e.target.value })}
+                                            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-1">Notes (Optional)</label>
+                                    <textarea
+                                        value={formData.notes}
+                                        onChange={e => setFormData({ ...formData, notes: e.target.value })}
+                                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none h-20"
+                                        placeholder="Any special instructions or pressure warnings..."
+                                    />
+                                </div>
+                            </form>
+                        </div>
+
+                        <div className="p-5 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setShowModal(false)}
+                                className="px-4 py-2 text-sm font-bold text-slate-600 hover:text-slate-900 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                form="schedule-form"
+                                disabled={submitting}
+                                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-lg shadow-sm transition-colors disabled:opacity-50"
+                            >
+                                {submitting ? 'Creating...' : 'Create Schedule'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

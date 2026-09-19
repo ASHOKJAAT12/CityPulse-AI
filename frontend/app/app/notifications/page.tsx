@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../../store/useAuthStore';
 import api from '../../../services/api';
-import { Bell, Check, Archive, Clock } from 'lucide-react';
+import { Bell, Check, Archive, Clock, Copy } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useWebSocket } from '../../../hooks/useWebSocket';
 
@@ -150,9 +150,30 @@ export default function NotificationsPage() {
                                             {new Date(notif.createdAt).toLocaleDateString()}
                                         </span>
                                     </div>
-                                    <p className={`text-sm mb-3 line-clamp-2 ${notif.status === 'UNREAD' ? 'text-slate-700 font-medium' : 'text-slate-500'}`}>
-                                        {notif.message}
-                                    </p>
+                                    {notif.category === 'ELECTRICITY' ? (
+                                        <div className="bg-[#1e1e1e] rounded-2xl p-4 shadow-[0_10px_30px_rgb(0,0,0,0.15)] border border-gray-800 text-gray-300 my-4 relative font-mono text-xs sm:text-sm leading-relaxed max-w-full overflow-hidden group">
+                                            <div className="flex justify-between items-center font-sans text-xs text-gray-400 mb-3 border-b border-gray-800 pb-2">
+                                                <span className="font-medium">Plain text</span>
+                                                <button
+                                                    className="hover:text-white transition flex items-center gap-1.5"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        navigator.clipboard.writeText(notif.message);
+                                                        toast.success('Copied to clipboard', { style: { background: '#333', color: '#fff' } });
+                                                    }}
+                                                >
+                                                    <Copy className="w-3.5 h-3.5" />
+                                                </button>
+                                            </div>
+                                            <pre className="whitespace-pre-wrap font-mono mt-2" style={{ fontFamily: '"Fira Code", "Courier New", monospace' }}>
+                                                {notif.message}
+                                            </pre>
+                                        </div>
+                                    ) : (
+                                        <p className={`text-sm mb-3 line-clamp-2 ${notif.status === 'UNREAD' ? 'text-slate-700 font-medium' : 'text-slate-500'}`}>
+                                            {notif.message}
+                                        </p>
+                                    )}
 
                                     <div className="flex items-center justify-between">
                                         <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium tracking-wide ${notif.priority === 'CRITICAL' || notif.priority === 'HIGH' ? 'bg-rose-100 text-rose-700' :

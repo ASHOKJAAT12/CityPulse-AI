@@ -70,6 +70,7 @@ export function ReportsLayer({ mode = 'citizen', cityId }: ReportsLayerProps) {
                             <div className="min-w-[240px] max-w-[280px] p-1 font-sans">
                                 {report.attachments && report.attachments.length > 0 && (
                                     <div className="w-full h-32 mb-3 rounded-lg overflow-hidden relative bg-slate-100">
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
                                         <img
                                             src={report.attachments[0].url}
                                             alt={report.title}

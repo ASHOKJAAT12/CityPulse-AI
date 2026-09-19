@@ -133,6 +133,7 @@ export default function ReportDetailPage() {
                                             target="_blank"
                                             rel="noreferrer"
                                         >
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
                                             <img
                                                 src={file.url}
                                                 alt="Attachment"

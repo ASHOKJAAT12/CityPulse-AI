@@ -15,8 +15,8 @@ export default function CitizenElectricityPage() {
 
     useEffect(() => {
         Promise.all([
-            api.get('/city/electricity/outages'),
-            api.get('/city/electricity/maintenance')
+            api.get('/electricity/outages'),
+            api.get('/electricity/maintenance')
         ])
             .then(([outagesRes, mainRes]: any) => {
                 setOutages(outagesRes.data.data.filter((o: any) => o.status === 'ACTIVE'));

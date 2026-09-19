@@ -12,6 +12,9 @@ export default function CitizenWaterPage() {
     const [schedules, setSchedules] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
+    const [alerts, setAlerts] = useState<any[]>([]);
+    const [loadingAlerts, setLoadingAlerts] = useState(true);
+
     const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const today = new Date().getDay();
 
@@ -20,6 +23,14 @@ export default function CitizenWaterPage() {
             .then((res: any) => setSchedules(res.data.data))
             .catch((err: any) => console.error(err))
             .finally(() => setLoading(false));
+
+        api.get('/notifications?category=SERVICE_ALERT')
+            .then((res: any) => {
+                // Notifications can be from pagination wrapper
+                setAlerts(res.data.data?.notifications || res.data.data || []);
+            })
+            .catch((err: any) => console.error(err))
+            .finally(() => setLoadingAlerts(false));
     }, []);
 
     const todaysSchedules = schedules.filter(s => s.dayOfWeek === today);
@@ -108,9 +119,26 @@ export default function CitizenWaterPage() {
                             <AlertTriangle className="w-24 h-24 text-red-500" />
                         </div>
                         <h3 className="font-bold text-red-700 text-lg mb-2">Public Alerts</h3>
-                        <p className="text-sm text-slate-600">
-                            There are currently no major disruptions or active maintenance alerts requiring public action in your zone.
-                        </p>
+
+                        {loadingAlerts ? (
+                            <p className="text-sm text-slate-400">Loading alerts...</p>
+                        ) : alerts.length > 0 ? (
+                            <div className="space-y-3 mt-4">
+                                {alerts.map(alert => (
+                                    <div key={alert._id} className="p-3 bg-red-50 rounded-xl border border-red-100 text-sm">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className={`w-2 h-2 rounded-full ${alert.priority === 'CRITICAL' ? 'bg-red-600 animate-pulse' : 'bg-orange-500'}`}></span>
+                                            <h4 className="font-bold text-red-800">{alert.title}</h4>
+                                        </div>
+                                        <p className="text-red-700/80">{alert.message}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-sm text-slate-600 mt-2">
+                                There are currently no major disruptions or active maintenance alerts requiring public action in your zone.
+                            </p>
+                        )}
                     </div>
                 </div>
             </div>

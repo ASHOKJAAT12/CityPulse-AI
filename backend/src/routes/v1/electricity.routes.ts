@@ -41,7 +41,7 @@ router.get('/outages/admin', ...adminAuth, ElectricityController.getOutages);
 router.get('/maintenance/admin', ...adminAuth, ElectricityController.getMaintenance);
 
 // ─── PUBLIC (CITIZEN) ROUTES ──────────────────────────────────────────────
-const citizenAccess = [requireCityAccess((req) => req.params['cityId'])];
+const citizenAccess = [authenticate, requireCityAccess((req) => req.user?.cityId || req.params['cityId'] || req.query['cityId'] as string)];
 
 router.get('/assets', ...citizenAccess, ElectricityController.getAssets);
 router.get('/assets/:id', ...citizenAccess, ElectricityController.getAsset);
